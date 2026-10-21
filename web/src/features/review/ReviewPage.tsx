@@ -1,17 +1,21 @@
+import { CircleAlert, Check } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { toast } from 'sonner';
 import type { ClarifyAnswer, MealItem, MealPatch, Portion } from '@/api/types';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
+import { MacroLine } from '@/components/MacroLine';
+import { StickyActionBar } from '@/components/StickyActionBar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   MEAL_TYPE_LABEL,
   formatDayLabel,
-  formatMacros,
   formatTime,
-  formatTotalsKcal,
+  formatTotalsKcalValue,
+  hasKcalRange,
 } from '@/lib/format';
 import { useConfirmMeal, useMeal, useUpdateMeal } from '@/features/meals/api';
 import { useClarify, useUpdateDraft } from './api';
@@ -40,7 +44,7 @@ export function ReviewPage() {
   const busy = clarify.isPending || update.isPending || confirm.isPending;
   const mutationError = clarify.error ?? update.error ?? confirm.error;
 
-  if (mealQuery.isPending) return <LoadingState label="Loading your meal…" />;
+  if (mealQuery.isPending) return <LoadingState label="Loading your meal…" layout="detail" />;
   if (mealQuery.isError)
     return <ErrorState error={mealQuery.error} onRetry={() => mealQuery.refetch()} />;
   if (!meal) return null;
@@ -48,6 +52,7 @@ export function ReviewPage() {
   if (meal.status === 'failed' || meal.status === 'analyzing') {
     return (
       <EmptyState
+        icon={<CircleAlert strokeWidth={1.75} />}
         title={meal.status === 'failed' ? 'This analysis did not finish' : 'Still analyzing'}
         description={meal.failure_reason ?? 'Try logging the meal again.'}
         action={
@@ -77,99 +82,110 @@ export function ReviewPage() {
   const open = asked.filter(({ a }) => a.status === 'unresolved').length;
 
   return (
-    <div className="space-y-5">
-      {/* Summary */}
-      <Card className="flex gap-3">
-        {meal.photo_url && (
-          <img
-            src={meal.photo_url}
-            alt="Meal photo"
-            className="size-20 shrink-0 rounded-xl object-cover"
-          />
+    <div className="flex flex-col">
+      <div className="space-y-6">
+        {/* Summary */}
+        <Card size="hero" className="flex-row gap-4">
+          {meal.photo_url && (
+            <img
+              src={meal.photo_url}
+              alt="Meal photo"
+              className="rounded-control size-20 shrink-0 object-cover"
+            />
+          )}
+          <div className="min-w-0 space-y-1">
+            <p className="text-label text-muted-foreground font-normal">
+              {MEAL_TYPE_LABEL[meal.meal_type]} · {formatDayLabel(meal.local_date)},{' '}
+              {formatTime(meal.eaten_at)}
+            </p>
+            <p className="flex flex-wrap items-baseline gap-x-1.5">
+              <span className="text-title tabular-nums">{formatTotalsKcalValue(meal.totals)}</span>
+              <span className="text-label text-muted-foreground font-normal">
+                kcal{hasKcalRange(meal.totals) ? ' (range)' : ''}
+              </span>
+            </p>
+            <MacroLine nutrition={meal.totals} />
+            <p className="text-caption text-muted-foreground pt-1">All values are estimates.</p>
+          </div>
+        </Card>
+
+        {mutationError && (
+          <Card>
+            <ErrorState error={mutationError} title="That change didn't save" />
+          </Card>
         )}
-        <div className="min-w-0 space-y-0.5">
-          <p className="text-muted text-sm">
-            {MEAL_TYPE_LABEL[meal.meal_type]} · {formatDayLabel(meal.local_date)},{' '}
-            {formatTime(meal.eaten_at)}
-          </p>
-          <p className="text-2xl font-semibold tabular-nums">{formatTotalsKcal(meal.totals)}</p>
-          <p className="text-muted text-sm tabular-nums">{formatMacros(meal.totals)}</p>
-          <p className="text-muted text-xs">All values are estimates.</p>
-        </div>
-      </Card>
 
-      {mutationError && <ErrorState error={mutationError} title="That change didn't save" />}
+        {asked.length > 0 && (
+          <section className="space-y-3" aria-labelledby="questions-h">
+            <h2 id="questions-h" className="text-heading flex items-center gap-2">
+              A few quick questions{open > 0 ? ` (${open} left)` : ''}
+              {open === 0 && (
+                <Check className="text-primary size-5" strokeWidth={1.75} aria-hidden="true" />
+              )}
+            </h2>
+            {asked.map(({ item, a }) => (
+              <ClarificationCard
+                key={a.id}
+                item={item}
+                attribute={a}
+                disabled={busy}
+                onAnswer={onAnswer(a.id)}
+              />
+            ))}
+          </section>
+        )}
 
-      {asked.length > 0 && (
-        <section className="space-y-3" aria-labelledby="questions-h">
-          <h2 id="questions-h" className="text-lg font-semibold">
-            A few quick questions{open > 0 ? ` (${open} left)` : ''}
+        <section className="space-y-3" aria-labelledby="items-h">
+          <h2 id="items-h" className="text-heading">
+            Items
           </h2>
-          {asked.map(({ item, a }) => (
-            <ClarificationCard
-              key={a.id}
+          {meal.items.length === 0 && (
+            <p className="text-muted-foreground">No items left. Add one or log the meal again.</p>
+          )}
+          {meal.items.map((item) => (
+            <ItemCard
+              key={item.id}
               item={item}
-              attribute={a}
               disabled={busy}
-              onAnswer={onAnswer(a.id)}
+              hideAskedCues={isDraft}
+              onEditPortion={setEditing}
+              onRemove={(it) => patch({ items: [{ op: 'remove', id: it.id }] })}
             />
           ))}
+          {/* TODO(Clark): "Add item" (useAddItem) and name/preparation edits with re-estimate. */}
         </section>
-      )}
+      </div>
 
-      <section className="space-y-3" aria-labelledby="items-h">
-        <h2 id="items-h" className="text-lg font-semibold">
-          Items
-        </h2>
-        {meal.items.length === 0 && (
-          <p className="text-muted">No items left. Add one or log the meal again.</p>
-        )}
-        {meal.items.map((item) => (
-          <ItemCard
-            key={item.id}
-            item={item}
-            disabled={busy}
-            hideAskedCues={isDraft}
-            onEditPortion={setEditing}
-            onRemove={(it) => patch({ items: [{ op: 'remove', id: it.id }] })}
-          />
-        ))}
-        {/* TODO(Clark): "Add item" (useAddItem) and name/preparation edits with re-estimate. */}
-      </section>
-
-      <div
-        className="border-line bg-bg/95 sticky z-20 -mx-4 border-t px-4 pt-3 pb-3 backdrop-blur"
-        style={{ bottom: 'calc(var(--spacing-nav) + env(safe-area-inset-bottom))' }}
-      >
+      <StickyActionBar>
         {isDraft ? (
           <>
             <Button
-              size="lg"
               className="w-full"
               disabled={busy || meal.items.length === 0}
               onClick={() =>
                 confirm.mutate(undefined, {
-                  onSuccess: (m) => navigate(`/meals/${m.id}`, { replace: true }),
+                  onSuccess: (m) => {
+                    toast.success('Meal saved');
+                    navigate(`/meals/${m.id}`, { replace: true });
+                  },
                 })
               }
             >
+              <Check aria-hidden="true" strokeWidth={1.75} />
               Confirm meal
             </Button>
-            <p className="text-muted mt-1 text-center text-xs">
+            <p className="text-caption text-muted-foreground mt-2 text-center">
               {open > 0
                 ? 'You can confirm now; unanswered questions keep their review cue.'
                 : 'Confirming saves this record. Values remain estimates.'}
             </p>
           </>
         ) : (
-          <Link
-            to={`/meals/${meal.id}`}
-            className="bg-accent text-accent-fg flex min-h-14 w-full items-center justify-center rounded-xl text-lg font-medium"
-          >
-            Done
-          </Link>
+          <Button asChild className="w-full">
+            <Link to={`/meals/${meal.id}`}>Done</Link>
+          </Button>
         )}
-      </div>
+      </StickyActionBar>
 
       <PortionEditor
         item={editing}

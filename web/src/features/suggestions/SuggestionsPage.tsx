@@ -1,10 +1,11 @@
+import { Lightbulb, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import type { SuggestionResponse } from '@/api/types';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
-import { IconBulb } from '@/components/icons';
 import { LoadingState } from '@/components/LoadingState';
+import { Button } from '@/components/ui/button';
 import { useRecommendations, useSuggestionFeedback } from './api';
 import { SuggestionCard } from './SuggestionCard';
 
@@ -18,7 +19,7 @@ export function SuggestionsPage() {
   const feedback = useSuggestionFeedback();
   const [given, setGiven] = useState<Record<string, SuggestionResponse>>({});
 
-  if (q.isPending) return <LoadingState label="Looking at your logged days…" />;
+  if (q.isPending) return <LoadingState label="Looking at your logged days…" layout="cards" />;
   if (q.isError) return <ErrorState error={q.error} onRetry={() => q.refetch()} />;
   const data = q.data;
 
@@ -26,16 +27,13 @@ export function SuggestionsPage() {
     const remaining = Math.max(0, data.required_day_count - data.logged_day_count);
     return (
       <EmptyState
-        icon={<IconBulb className="size-10" />}
+        icon={<Lightbulb strokeWidth={1.75} />}
         title="Suggestions need a few more days"
-        description={`Suggestions start after ${data.required_day_count} logged days. You have ${data.logged_day_count} so far — ${remaining} to go.`}
+        description={`Suggestions start after ${data.required_day_count} logged days. You have ${data.logged_day_count} so far, ${remaining} to go.`}
         action={
-          <Link
-            to="/log"
-            className="min-h-touch bg-accent text-accent-fg flex items-center justify-center rounded-xl font-medium"
-          >
-            Log a meal
-          </Link>
+          <Button asChild className="w-full">
+            <Link to="/log">Log a meal</Link>
+          </Button>
         }
       />
     );
@@ -43,9 +41,8 @@ export function SuggestionsPage() {
 
   return (
     <div className="space-y-4">
-      <p className="text-muted text-sm">
-        Based on {data.logged_day_count} logged days. Ideas only — adjust them to what works for
-        you.
+      <p className="text-label text-muted-foreground font-normal">
+        Based on {data.logged_day_count} logged days. Ideas only; adjust them to what works for you.
       </p>
       {data.suggestions.length === 0 && (
         <EmptyState
@@ -68,9 +65,12 @@ export function SuggestionsPage() {
         />
       ))}
       {feedback.isError && <ErrorState error={feedback.error} title="Feedback not sent" />}
-      <Link to="/chat" className="text-muted block text-center text-sm underline">
-        Ask a question about your meals (preview)
-      </Link>
+      <Button asChild variant="ghost" className="w-full">
+        <Link to="/chat">
+          <MessageCircle aria-hidden="true" strokeWidth={1.75} />
+          Ask about your meals (preview)
+        </Link>
+      </Button>
     </div>
   );
 }

@@ -1,68 +1,221 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 /*
- * Design tokens (Tailwind v4 is configured in CSS, not tailwind.config.js).
- * Semantic colors are CSS variables so dark mode only swaps values.
- * Use the semantic names (bg-surface, text-muted, border-line, bg-accent, ...)
- * rather than raw palette colors in components.
+ * Design tokens: docs/06-ux/ui-guidelines.md §2–§4 (the spec; change it there first).
+ *
+ * - Raw colors live ONLY in this file. Components use the semantic utilities
+ *   (bg-card, text-muted-foreground, bg-primary-soft, text-attention, bg-protein,
+ *   text-protein-text, ...), never hex values or Tailwind palette classes.
+ * - Light and dark are both designed. Dark follows `prefers-color-scheme`; a
+ *   `.dark` class on <html> forces dark and a `.light` class forces light.
+ *   Tailwind's `dark:` variant follows the same rule (see @custom-variant below).
  */
-:root {
-  --c-bg: #f6f7f9;
-  --c-surface: #ffffff;
-  --c-surface-2: #eef0f3;
-  --c-text: #14171c;
-  --c-muted: #5b6370;
-  --c-line: #dde1e6;
-  --c-accent: #0d9488;
-  --c-accent-fg: #ffffff;
-  --c-accent-soft: #ccfbf1;
-  --c-review: #b45309;
-  --c-review-soft: #fef3c7;
-  --c-danger: #b91c1c;
-  --c-danger-soft: #fee2e2;
-  color-scheme: light;
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-bg: #0f1115;
-    --c-surface: #181b21;
-    --c-surface-2: #22262e;
-    --c-text: #eceef2;
-    --c-muted: #9aa3b0;
-    --c-line: #2e333c;
-    --c-accent: #2dd4bf;
-    --c-accent-fg: #042f2e;
-    --c-accent-soft: #134e4a;
-    --c-review: #fbbf24;
-    --c-review-soft: #422006;
-    --c-danger: #f87171;
-    --c-danger-soft: #450a0a;
-    color-scheme: dark;
+/* `dark:` = system dark (unless <html class="light">) OR an explicit .dark ancestor. */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(html:not(.light), html:not(.light) *) {
+      @slot;
+    }
   }
 }
 
+/* ---------- Light (default) ---------- */
+:root {
+  color-scheme: light;
+
+  /* §2.1 Surface and text */
+  --background: #fbf9f6;
+  --card: #ffffff;
+  --muted: #f3efe9;
+  --border: #ebe5dc;
+  --foreground: #2a2622;
+  --muted-foreground: #6b645c;
+  --subtle-foreground: #8f877d;
+
+  /* §2.2 Brand and interaction */
+  --primary: #c2532a;
+  --primary-foreground: #ffffff;
+  --primary-soft: #fbe9e1;
+  --ring: #c2532a;
+  --attention: #b7791f;
+  --destructive: #c0392b;
+  --destructive-foreground: #ffffff;
+
+  /* §2.3 Data colors (fill) and text-safe variants */
+  --kcal: #c2532a;
+  --protein: #2a78d6;
+  --carbs: #eda100;
+  --fat: #e87ba4;
+  --kcal-text: #c2532a;
+  --protein-text: #1f5fae;
+  --carbs-text: #8a5d00;
+  --fat-text: #b0386a;
+
+  /* §4 Shadow: cards only in light mode; dark mode uses a 1px border instead. */
+  --shadow-card-value: 0 1px 2px rgb(42 38 34 / 0.04), 0 4px 12px rgb(42 38 34 / 0.05);
+  --card-edge: transparent;
+  --overlay: rgb(22 20 18 / 0.4);
+}
+
+/* ---------- Dark: system preference ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    color-scheme: dark;
+    --background: #161412;
+    --card: #1f1d1a;
+    --muted: #2a2724;
+    --border: #34302b;
+    --foreground: #f3efe9;
+    --muted-foreground: #b8b0a5;
+    --subtle-foreground: #8f877d;
+    --primary: #e8754a;
+    --primary-foreground: #1f1d1a;
+    --primary-soft: #3a2a22;
+    --ring: #e8754a;
+    --attention: #e0a43a;
+    --destructive: #e5675b;
+    --destructive-foreground: #1f1d1a;
+    --kcal: #e8754a;
+    --protein: #3987e5;
+    --carbs: #c98500;
+    --fat: #d55181;
+    --kcal-text: #e8754a;
+    --protein-text: #3987e5;
+    --carbs-text: #c98500;
+    /* The dark fat fill (#d55181) is ~3.6:1 on the dark background; use the lighter tint for text. */
+    --fat-text: #e87ba4;
+    --shadow-card-value: none;
+    --card-edge: #34302b;
+    --overlay: rgb(0 0 0 / 0.6);
+  }
+}
+
+/* ---------- Dark: explicit class (same values as above) ---------- */
+:root.dark,
+.dark {
+  color-scheme: dark;
+  --background: #161412;
+  --card: #1f1d1a;
+  --muted: #2a2724;
+  --border: #34302b;
+  --foreground: #f3efe9;
+  --muted-foreground: #b8b0a5;
+  --subtle-foreground: #8f877d;
+  --primary: #e8754a;
+  --primary-foreground: #1f1d1a;
+  --primary-soft: #3a2a22;
+  --ring: #e8754a;
+  --attention: #e0a43a;
+  --destructive: #e5675b;
+  --destructive-foreground: #1f1d1a;
+  --kcal: #e8754a;
+  --protein: #3987e5;
+  --carbs: #c98500;
+  --fat: #d55181;
+  --kcal-text: #e8754a;
+  --protein-text: #3987e5;
+  --carbs-text: #c98500;
+  --fat-text: #e87ba4;
+  --shadow-card-value: none;
+  --card-edge: #34302b;
+  --overlay: rgb(0 0 0 / 0.6);
+}
+
+/* ---------- Map variables to Tailwind utilities ---------- */
 @theme inline {
-  --color-bg: var(--c-bg);
-  --color-surface: var(--c-surface);
-  --color-surface-2: var(--c-surface-2);
-  --color-text: var(--c-text);
-  --color-muted: var(--c-muted);
-  --color-line: var(--c-line);
-  --color-accent: var(--c-accent);
-  --color-accent-fg: var(--c-accent-fg);
-  --color-accent-soft: var(--c-accent-soft);
-  --color-review: var(--c-review);
-  --color-review-soft: var(--c-review-soft);
-  --color-danger: var(--c-danger);
-  --color-danger-soft: var(--c-danger-soft);
+  /* Surface and text */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--card);
+  --color-popover-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+  --color-border: var(--border);
+  --color-input: var(--border);
+  --color-card-edge: var(--card-edge);
+  --color-overlay: var(--overlay);
+
+  /* Brand and interaction (secondary/accent are shadcn aliases for the muted fill) */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--muted);
+  --color-accent-foreground: var(--foreground);
+  --color-ring: var(--ring);
+  --color-attention: var(--attention);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Data colors */
+  --color-kcal: var(--kcal);
+  --color-protein: var(--protein);
+  --color-carbs: var(--carbs);
+  --color-fat: var(--fat);
+  --color-kcal-text: var(--kcal-text);
+  --color-protein-text: var(--protein-text);
+  --color-carbs-text: var(--carbs-text);
+  --color-fat-text: var(--fat-text);
+
+  /* Shadow (cards only) */
+  --shadow-card: var(--shadow-card-value);
 }
 
 @theme {
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* §3 System font stack */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: var(--font-sans);
+
+  /* §3 Typography scale: text-display, text-title, text-heading, text-body, text-label, text-caption */
+  --text-display: 2.5rem;
+  --text-display--line-height: 2.75rem;
+  --text-display--font-weight: 700;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-title--font-weight: 700;
+  --text-heading: 1.0625rem;
+  --text-heading--line-height: 1.5rem;
+  --text-heading--font-weight: 600;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5rem;
+  --text-body--font-weight: 400;
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.25rem;
+  --text-label--font-weight: 500;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.125rem;
+  --text-caption--font-weight: 400;
+
+  /* §4 Radii: rounded-card (20), rounded-control (12), rounded-full (chips/pills), rounded-small (8).
+     shadcn's sm/md/lg/xl keys are aligned to the same values. */
+  --radius: 0.75rem;
+  --radius-small: 0.5rem;
+  --radius-control: 0.75rem;
+  --radius-card: 1.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
+
+  /* §4 Layout */
   --spacing-touch: 2.75rem; /* 44px minimum touch target */
-  --spacing-nav: 4rem; /* bottom nav height, excluding safe area */
-  --container-app: 30rem; /* max content width (~480px) on larger screens */
+  --spacing-nav: 4rem; /* bottom nav height, excluding the safe area */
+  --spacing-action-bar: 5rem; /* sticky page action bar (48px button + padding) */
+  --container-app: 35rem; /* 560px max content width */
+
+  /* §9 Motion */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
 }
 
 @utility pb-safe {
@@ -71,19 +224,44 @@
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);
 }
-
-html,
-body {
-  background-color: var(--c-bg);
-  color: var(--c-text);
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
+/* Fixed offset above the bottom nav (and the safe area). */
+@utility bottom-nav-offset {
+  bottom: calc(var(--spacing-nav) + env(safe-area-inset-bottom));
 }
 
-body {
-  @apply font-sans antialiased;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+    /* `clip`, not `hidden`: `hidden` on body makes it a scroll container, which
+       breaks position: sticky (the action bar above the nav). */
+    overflow-x: clip;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply text-body font-sans antialiased;
+  }
+  #root {
+    min-height: 100dvh;
+  }
+  /* §8 Visible focus ring everywhere (2px, offset 2px). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
 
-#root {
-  min-height: 100dvh;
+/* §8 / §9: respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

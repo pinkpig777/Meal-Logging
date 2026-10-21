@@ -1,14 +1,19 @@
+import { Camera, Check, PenLine, Sparkles, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '@/auth/AuthContext';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { ErrorState } from '@/components/ErrorState';
-import { inputClass } from '@/components/Field';
-import { IconCamera, IconClose, IconText } from '@/components/icons';
 import { Spinner } from '@/components/LoadingState';
+import { StickyActionBar } from '@/components/StickyActionBar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { ApiError } from '@/lib/api';
 import { toIsoWithOffset } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { useAnalyzeMeal } from './api';
 import { resizePhoto, uploadMealPhoto } from './photo';
 
@@ -142,31 +147,56 @@ export function CapturePage() {
 
   // ---------- Working ----------
   if (phase.kind === 'working') {
+    const stages = (Object.keys(STAGE_COPY) as Stage[]).filter(
+      (s) => s !== 'uploading' || mode === 'photo',
+    );
+    const current = stages.indexOf(phase.stage);
     return (
-      <div className="flex flex-col items-center gap-6 pt-4">
+      <div className="space-y-6">
         {previewUrl ? (
           <img
             src={previewUrl}
             alt="Your meal photo"
-            className="max-h-72 w-full rounded-2xl object-cover"
+            className="rounded-card max-h-72 w-full object-cover"
           />
         ) : (
-          <Card className="text-muted w-full">“{trimmed}”</Card>
+          <Card>
+            <p className="text-muted-foreground">“{trimmed}”</p>
+          </Card>
         )}
-        <div role="status" aria-live="polite" className="flex items-center gap-3 text-lg">
-          <Spinner />
-          <span>{STAGE_COPY[phase.stage]}</span>
-        </div>
-        <ol className="text-muted flex gap-2 text-xs" aria-hidden="true">
-          {(Object.keys(STAGE_COPY) as Stage[])
-            .filter((s) => s !== 'uploading' || mode === 'photo')
-            .map((s) => (
+        <Card className="gap-4">
+          <div role="status" aria-live="polite" className="flex items-center gap-3">
+            <Spinner />
+            <span className="text-heading">{STAGE_COPY[phase.stage]}</span>
+          </div>
+          <ol className="space-y-2" aria-label="Progress">
+            {stages.map((s, i) => (
               <li
                 key={s}
-                className={`h-1.5 w-10 rounded-full ${s === phase.stage ? 'bg-accent' : 'bg-line'}`}
-              />
+                className={cn(
+                  'text-label flex items-center gap-2 font-normal',
+                  i <= current ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'flex size-5 items-center justify-center rounded-full',
+                    i < current && 'bg-primary text-primary-foreground',
+                    i === current && 'border-primary border-2',
+                    i > current && 'border-border border-2',
+                  )}
+                >
+                  {i < current && <Check className="size-3" strokeWidth={3} />}
+                </span>
+                {STAGE_COPY[s].replace('…', '')}
+                <span className="sr-only">
+                  {i < current ? ' (done)' : i === current ? ' (in progress)' : ''}
+                </span>
+              </li>
             ))}
-        </ol>
+          </ol>
+        </Card>
         <Button variant="secondary" className="w-full" onClick={cancel}>
           Cancel
         </Button>
@@ -182,135 +212,161 @@ export function CapturePage() {
           <img
             src={previewUrl}
             alt="Your meal photo"
-            className="max-h-56 w-full rounded-2xl object-cover"
+            className="rounded-card max-h-56 w-full object-cover"
           />
         )}
-        <ErrorState error={phase.error} title="We couldn't analyze this meal" onRetry={submit}>
-          <Button variant="secondary" className="w-full" onClick={describeInstead}>
-            <IconText className="size-5" />
-            Describe instead
-          </Button>
-        </ErrorState>
+        <Card>
+          <ErrorState error={phase.error} title="We couldn't analyze this meal" onRetry={submit}>
+            <Button variant="secondary" className="w-full" onClick={describeInstead}>
+              <PenLine aria-hidden="true" strokeWidth={1.75} />
+              Describe instead
+            </Button>
+          </ErrorState>
+        </Card>
       </div>
     );
   }
 
   // ---------- Idle ----------
+  const showAction = mode === 'text' || !!previewUrl;
   return (
-    <div className="space-y-5">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="sr-only"
-        tabIndex={-1}
-        aria-hidden="true"
-        onChange={onPick}
-      />
+    <div className="flex flex-col">
+      <div className="space-y-6">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={onPick}
+        />
 
-      {mode === 'photo' && previewUrl ? (
-        <div className="relative">
-          <img
-            src={previewUrl}
-            alt="Your meal photo"
-            className="max-h-80 w-full rounded-2xl object-cover"
-          />
-          <button
-            type="button"
-            onClick={clearPhoto}
-            className="size-touch absolute top-2 right-2 inline-flex items-center justify-center rounded-full bg-black/55 text-white"
-            aria-label="Remove photo"
-          >
-            <IconClose className="size-5" />
-          </button>
-          <Button
-            variant="secondary"
-            className="mt-2 w-full"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            Retake photo
-          </Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-3">
-          <Button
-            size="lg"
-            variant={mode === 'text' ? 'secondary' : 'primary'}
-            className={mode === 'text' ? 'min-h-16' : 'min-h-28 flex-col text-lg'}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <IconCamera className="size-8" />
-            Take photo
-          </Button>
-          <Button
-            size="lg"
-            variant={mode === 'text' ? 'primary' : 'secondary'}
-            className="min-h-16"
-            aria-pressed={mode === 'text'}
-            onClick={() => setMode('text')}
-          >
-            <IconText className="size-6" />
-            Describe meal
-          </Button>
-        </div>
-      )}
-
-      {(mode === 'text' || previewUrl) && (
-        <div className="space-y-1">
-          <label htmlFor="meal-text" className="block text-sm font-medium">
-            {mode === 'text' ? 'What did you eat?' : 'Add details (optional)'}
-          </label>
-          <textarea
-            id="meal-text"
-            rows={3}
-            maxLength={MAX_TEXT}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={
-              mode === 'text'
-                ? 'e.g. chicken burrito bowl, extra rice'
-                : 'e.g. extra rice, no cheese'
-            }
-            className={`${inputClass} py-2`}
-          />
-          <p className="text-muted text-right text-xs">
-            {text.length}/{MAX_TEXT}
-          </p>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <label className="min-h-touch flex items-center gap-3">
-          <input
-            type="checkbox"
-            className="accent-accent size-5"
-            checked={backfill}
-            onChange={(e) => setBackfill(e.target.checked)}
-          />
-          <span>Logged later? Set when you ate</span>
-        </label>
-        {backfill && (
-          <div className="space-y-1">
-            <label htmlFor="eaten-at" className="block text-sm font-medium">
-              When did you eat this?
-            </label>
-            <input
-              id="eaten-at"
-              type="datetime-local"
-              className={inputClass}
-              value={eatenAt}
-              max={toLocalInput(new Date())}
-              onChange={(e) => setEatenAt(e.target.value)}
-            />
+        {mode === 'photo' && previewUrl ? (
+          <div className="space-y-3">
+            <div className="relative">
+              <img
+                src={previewUrl}
+                alt="Your meal photo"
+                className="rounded-card max-h-80 w-full object-cover"
+              />
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={clearPhoto}
+                className="absolute top-3 right-3 border-transparent"
+                aria-label="Remove photo"
+              >
+                <X aria-hidden="true" strokeWidth={1.75} />
+              </Button>
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Camera aria-hidden="true" strokeWidth={1.75} />
+              Retake photo
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {mode === 'text' ? (
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Camera aria-hidden="true" strokeWidth={1.75} />
+                Take photo instead
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-card bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85 flex min-h-44 flex-col items-center justify-center gap-3 p-5 transition-colors duration-150"
+              >
+                <span className="bg-primary-foreground/15 flex size-16 items-center justify-center rounded-full">
+                  <Camera className="size-8" strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <span className="text-title">Take photo</span>
+                <span className="text-label font-normal opacity-90">
+                  Snap your plate; we'll estimate the rest
+                </span>
+              </button>
+            )}
+            <Button
+              variant="secondary"
+              className={cn('w-full', mode === 'text' && 'bg-primary-soft border-primary')}
+              aria-pressed={mode === 'text'}
+              onClick={() => setMode('text')}
+            >
+              <PenLine aria-hidden="true" strokeWidth={1.75} />
+              Describe meal
+            </Button>
           </div>
         )}
-        {!backfill && <p className="text-muted text-sm">Meal time: now</p>}
+
+        {(mode === 'text' || previewUrl) && (
+          <div className="space-y-2">
+            <Label htmlFor="meal-text">
+              {mode === 'text' ? 'What did you eat?' : 'Add details (optional)'}
+            </Label>
+            <Textarea
+              id="meal-text"
+              rows={3}
+              maxLength={MAX_TEXT}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={
+                mode === 'text'
+                  ? 'e.g. chicken burrito bowl, extra rice'
+                  : 'e.g. extra rice, no cheese'
+              }
+            />
+            <p className="text-caption text-muted-foreground text-right tabular-nums">
+              {text.length}/{MAX_TEXT}
+            </p>
+          </div>
+        )}
+
+        <Card className="gap-3">
+          <div className="min-h-touch flex items-center gap-3">
+            <Checkbox
+              id="backfill"
+              checked={backfill}
+              onCheckedChange={(v) => setBackfill(v === true)}
+            />
+            <Label htmlFor="backfill" className="text-body font-normal">
+              Logged later? Set when you ate
+            </Label>
+          </div>
+          {backfill ? (
+            <div className="space-y-2">
+              <Label htmlFor="eaten-at">When did you eat this?</Label>
+              <Input
+                id="eaten-at"
+                type="datetime-local"
+                value={eatenAt}
+                max={toLocalInput(new Date())}
+                onChange={(e) => setEatenAt(e.target.value)}
+              />
+            </div>
+          ) : (
+            <p className="text-caption text-muted-foreground">Meal time: now</p>
+          )}
+        </Card>
       </div>
 
-      <Button size="lg" className="w-full" disabled={!canSubmit} onClick={submit}>
-        Analyze meal
-      </Button>
+      {showAction && (
+        <StickyActionBar>
+          <Button className="w-full" disabled={!canSubmit} onClick={submit}>
+            <Sparkles aria-hidden="true" strokeWidth={1.75} />
+            Analyze meal
+          </Button>
+        </StickyActionBar>
+      )}
     </div>
   );
 }

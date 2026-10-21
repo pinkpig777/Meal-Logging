@@ -1,24 +1,20 @@
+import { CalendarDays, ChevronLeft, ChevronRight, UtensilsCrossed } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
-import { Card } from '@/components/Card';
+import { CalorieHero } from '@/components/CalorieHero';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
-import { IconBack, IconChevronRight } from '@/components/icons';
 import { LoadingState } from '@/components/LoadingState';
-import {
-  MEAL_TYPE_LABEL,
-  formatDayLabel,
-  formatTime,
-  formatTotalsKcal,
-  parseLocalDate,
-  toLocalDateString,
-} from '@/lib/format';
+import { MacroTile } from '@/components/MacroTile';
+import { MealRow } from '@/components/MealRow';
+import { Button } from '@/components/ui/button';
+import { formatDayLabel, parseLocalDate, toLocalDateString } from '@/lib/format';
 import { useDailyAnalytics } from './api';
-import { TotalsTable } from './TotalsTable';
 
 /**
  * M4 · Xiaochuan — daily dashboard (`/` and `/?date=YYYY-MM-DD` for drill-down).
- * Placeholder rendering: plain text/tables only, no chart library yet.
- * TODO(Xiaochuan): visual design per docs/03-design/m4-visualization.md.
+ * Numbers first: calorie hero, macro tiles, meals. No chart library yet.
+ * TODO(Xiaochuan): visual design per docs/03-design/m4-visualization.md
+ * (replace the hero/tiles with the chosen visualization if needed).
  */
 export function TodayPage() {
   const [params, setParams] = useSearchParams();
@@ -35,93 +31,89 @@ export function TodayPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => shift(-1)}
-          className="size-touch hover:bg-surface-2 inline-flex items-center justify-center rounded-full"
-          aria-label="Previous day"
-        >
-          <IconBack className="size-5" />
-        </button>
-        <h2 className="text-lg font-semibold">{isToday ? 'Today' : formatDayLabel(date)}</h2>
-        <button
-          type="button"
+    <div className="space-y-6">
+      <div className="-mx-2 flex items-center justify-between">
+        <Button variant="ghost" size="icon" onClick={() => shift(-1)} aria-label="Previous day">
+          <ChevronLeft strokeWidth={1.75} aria-hidden="true" />
+        </Button>
+        <h2 className="text-heading">{formatDayLabel(date)}</h2>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => shift(1)}
           disabled={isToday}
-          className="size-touch hover:bg-surface-2 inline-flex items-center justify-center rounded-full disabled:opacity-30"
           aria-label="Next day"
         >
-          <IconChevronRight className="size-5" />
-        </button>
+          <ChevronRight strokeWidth={1.75} aria-hidden="true" />
+        </Button>
       </div>
 
-      {q.isPending && <LoadingState />}
+      {q.isPending && <LoadingState layout="today" />}
       {q.isError && <ErrorState error={q.error} onRetry={() => q.refetch()} />}
 
       {q.data && !q.data.logged && (
-        <Card>
-          {/* Unlogged day: unknown intake, never zero (ADR-0005). */}
+        // Unlogged day: unknown intake, never zero (ADR-0005).
+        <div className="rounded-card border-border border-2 border-dashed">
           <EmptyState
-            title="Not logged"
+            icon={<UtensilsCrossed strokeWidth={1.75} />}
+            title={isToday ? 'No meals yet today' : 'Not logged'}
             description={
               isToday
-                ? 'No meals confirmed yet today.'
+                ? 'Log a meal to see your totals.'
                 : 'No meals were logged for this day, so intake is unknown.'
             }
             action={
-              <Link
-                to={isToday ? '/log' : '/log?backfill=1'}
-                className="min-h-touch bg-accent text-accent-fg flex items-center justify-center rounded-xl font-medium"
-              >
-                {isToday ? 'Log a meal' : 'Log a past meal'}
-              </Link>
+              <Button asChild className="w-full">
+                <Link to={isToday ? '/log' : '/log?backfill=1'}>
+                  {isToday ? 'Log a meal' : 'Log a past meal'}
+                </Link>
+              </Button>
             }
           />
-        </Card>
+        </div>
       )}
 
       {q.data?.logged && q.data.totals && (
         <>
-          <Card>
-            <TotalsTable totals={q.data.totals} goal={q.data.goal} />
-            <p className="text-muted mt-2 text-xs">All values are estimates.</p>
-          </Card>
+          <section className="space-y-3" aria-label="Totals">
+            <CalorieHero totals={q.data.totals} goal={q.data.goal?.kcal ?? null} />
+            <div className="grid grid-cols-3 gap-3">
+              <MacroTile
+                nutrient="protein"
+                value={q.data.totals.protein_g}
+                goal={q.data.goal?.protein_g ?? null}
+              />
+              <MacroTile
+                nutrient="carbs"
+                value={q.data.totals.carbs_g}
+                goal={q.data.goal?.carbs_g ?? null}
+              />
+              <MacroTile
+                nutrient="fat"
+                value={q.data.totals.fat_g}
+                goal={q.data.goal?.fat_g ?? null}
+              />
+            </div>
+            <p className="text-caption text-muted-foreground">All values are estimates.</p>
+          </section>
 
-          <section className="space-y-2" aria-labelledby="today-meals-h">
-            <h2 id="today-meals-h" className="text-lg font-semibold">
+          <section className="space-y-3" aria-labelledby="today-meals-h">
+            <h2 id="today-meals-h" className="text-heading">
               Meals
             </h2>
             {q.data.meals.map((m) => (
-              <Link key={m.id} to={`/meals/${m.id}`} className="block">
-                <Card className="flex items-center gap-3 p-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">
-                      {MEAL_TYPE_LABEL[m.meal_type]}{' '}
-                      <span className="text-muted font-normal">· {formatTime(m.eaten_at)}</span>
-                    </p>
-                    <p className="text-muted truncate text-sm">{m.item_names.join(', ')}</p>
-                  </div>
-                  <div className="shrink-0 text-right text-sm tabular-nums">
-                    <p className="font-medium">{formatTotalsKcal(m.totals)}</p>
-                    <p className="text-muted">{Math.round(m.share.kcal * 100)}% of day</p>
-                  </div>
-                  <IconChevronRight className="text-muted size-4 shrink-0" />
-                </Card>
-              </Link>
+              <MealRow key={m.id} meal={m} />
             ))}
           </section>
         </>
       )}
 
-      <Link
-        to="/week"
-        className="min-h-touch border-line bg-surface flex items-center justify-center gap-1 rounded-xl border font-medium"
-      >
-        View this week
-        <IconChevronRight className="size-4" />
-      </Link>
+      <Button asChild variant="secondary" className="w-full">
+        <Link to="/week">
+          <CalendarDays aria-hidden="true" strokeWidth={1.75} />
+          View this week
+        </Link>
+      </Button>
     </div>
   );
 }

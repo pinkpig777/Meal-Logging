@@ -1,19 +1,16 @@
+import { ImageOff, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { toast } from 'sonner';
+import { BottomSheet } from '@/components/BottomSheet';
 import { ErrorState } from '@/components/ErrorState';
-import { IconEdit, IconTrash } from '@/components/icons';
 import { LoadingState } from '@/components/LoadingState';
-import { Sheet } from '@/components/Sheet';
+import { MacroLine } from '@/components/MacroLine';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { ItemCard } from '@/features/review/ItemEditor';
-import {
-  MEAL_TYPE_LABEL,
-  formatDayLabel,
-  formatMacros,
-  formatTime,
-  formatTotalsKcal,
-} from '@/lib/format';
+import { MEAL_TYPE_LABEL, formatDayLabel, formatTime, formatTotalsKcalValue } from '@/lib/format';
 import { useDeleteMeal, useDeleteMealPhoto, useMeal } from './api';
 
 /**
@@ -29,42 +26,43 @@ export function MealDetailPage() {
   const delPhoto = useDeleteMealPhoto(id);
   const [confirming, setConfirming] = useState<'meal' | 'photo' | null>(null);
 
-  if (mealQuery.isPending) return <LoadingState />;
+  if (mealQuery.isPending) return <LoadingState layout="detail" />;
   if (mealQuery.isError)
     return <ErrorState error={mealQuery.error} onRetry={() => mealQuery.refetch()} />;
   const meal = mealQuery.data;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {meal.photo_url && (
         <img
           src={meal.photo_url}
           alt="Meal photo"
-          className="max-h-72 w-full rounded-2xl object-cover"
+          className="rounded-card max-h-72 w-full object-cover"
         />
       )}
-      <Card className="space-y-1">
-        <p className="text-muted text-sm">
+      <Card size="hero" className="gap-1">
+        <p className="text-label text-muted-foreground flex flex-wrap items-center gap-2 font-normal">
           {MEAL_TYPE_LABEL[meal.meal_type]} · {formatDayLabel(meal.local_date)},{' '}
           {formatTime(meal.eaten_at)}
-          {meal.status === 'draft' && ' · Draft'}
+          {meal.status === 'draft' && <Badge variant="secondary">Draft</Badge>}
         </p>
-        <p className="text-2xl font-semibold tabular-nums">{formatTotalsKcal(meal.totals)}</p>
-        <p className="text-muted text-sm tabular-nums">{formatMacros(meal.totals)}</p>
-        {meal.text_input && <p className="text-sm">“{meal.text_input}”</p>}
+        <p className="flex items-baseline gap-1.5">
+          <span className="text-display tabular-nums">{formatTotalsKcalValue(meal.totals)}</span>
+          <span className="text-heading text-muted-foreground font-normal">kcal</span>
+        </p>
+        <MacroLine nutrition={meal.totals} className="text-label" />
+        {meal.text_input && <p className="text-muted-foreground pt-2">“{meal.text_input}”</p>}
+        <p className="text-caption text-muted-foreground pt-2">All values are estimates.</p>
       </Card>
 
       {meal.status === 'draft' && (
-        <Link
-          to={`/meals/${meal.id}/review`}
-          className="min-h-touch bg-accent text-accent-fg flex items-center justify-center rounded-xl font-medium"
-        >
-          Continue review
-        </Link>
+        <Button asChild className="w-full">
+          <Link to={`/meals/${meal.id}/review`}>Continue review</Link>
+        </Button>
       )}
 
       <section className="space-y-3" aria-labelledby="detail-items-h">
-        <h2 id="detail-items-h" className="text-lg font-semibold">
+        <h2 id="detail-items-h" className="text-heading">
           Items
         </h2>
         {meal.items.map((item) => (
@@ -72,58 +70,71 @@ export function MealDetailPage() {
         ))}
       </section>
 
-      {(del.error || delPhoto.error) && <ErrorState error={del.error ?? delPhoto.error} />}
+      {(del.error || delPhoto.error) && (
+        <Card>
+          <ErrorState error={del.error ?? delPhoto.error} title="Not deleted" />
+        </Card>
+      )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-3">
         {meal.status === 'confirmed' && (
-          <Link
-            to={`/meals/${meal.id}/review`}
-            className="min-h-touch border-line bg-surface flex items-center justify-center gap-2 rounded-xl border font-medium"
-          >
-            <IconEdit className="size-4" />
-            Edit meal
-          </Link>
+          <Button asChild variant="secondary" className="w-full">
+            <Link to={`/meals/${meal.id}/review`}>
+              <Pencil aria-hidden="true" strokeWidth={1.75} />
+              Edit meal
+            </Link>
+          </Button>
         )}
         {meal.photo_url && (
-          <Button variant="secondary" onClick={() => setConfirming('photo')}>
+          <Button variant="ghost" className="w-full" onClick={() => setConfirming('photo')}>
+            <ImageOff aria-hidden="true" strokeWidth={1.75} />
             Delete photo only
           </Button>
         )}
-        <Button variant="danger" onClick={() => setConfirming('meal')}>
-          <IconTrash className="size-4" />
+        <Button variant="destructive" className="w-full" onClick={() => setConfirming('meal')}>
+          <Trash2 aria-hidden="true" strokeWidth={1.75} />
           Delete meal
         </Button>
       </div>
 
-      <Sheet
+      <BottomSheet
         open={confirming !== null}
         onClose={() => setConfirming(null)}
         title={confirming === 'photo' ? 'Delete photo?' : 'Delete meal?'}
-      >
-        <p className="text-muted mb-4">
-          {confirming === 'photo'
+        description={
+          confirming === 'photo'
             ? 'The photo is removed permanently. The meal and its values stay.'
-            : 'This meal and its photo are removed permanently.'}
-        </p>
-        <div className="grid gap-2">
-          <Button
-            variant="danger"
-            disabled={del.isPending || delPhoto.isPending}
-            onClick={() =>
-              confirming === 'photo'
-                ? delPhoto.mutate(undefined, { onSettled: () => setConfirming(null) })
-                : del.mutate(undefined, {
-                    onSuccess: () => navigate('/history', { replace: true }),
-                  })
-            }
-          >
-            Delete
-          </Button>
-          <Button variant="secondary" onClick={() => setConfirming(null)}>
-            Cancel
-          </Button>
-        </div>
-      </Sheet>
+            : 'This meal and its photo are removed permanently.'
+        }
+        footer={
+          <>
+            <Button
+              variant="destructive"
+              className="w-full"
+              disabled={del.isPending || delPhoto.isPending}
+              onClick={() =>
+                confirming === 'photo'
+                  ? delPhoto.mutate(undefined, {
+                      onSuccess: () => toast.success('Photo deleted'),
+                      onSettled: () => setConfirming(null),
+                    })
+                  : del.mutate(undefined, {
+                      onSuccess: () => {
+                        toast.success('Meal deleted');
+                        navigate('/history', { replace: true });
+                      },
+                    })
+              }
+            >
+              <Trash2 aria-hidden="true" strokeWidth={1.75} />
+              Delete
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={() => setConfirming(null)}>
+              Cancel
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

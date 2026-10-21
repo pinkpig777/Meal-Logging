@@ -1,12 +1,12 @@
+import { Check } from 'lucide-react';
 import { useState } from 'react';
 import type { ClarifyAnswer, MealItem, UncertainAttribute } from '@/api/types';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
-import { inputClass } from '@/components/Field';
-import { IconCheck } from '@/components/icons';
 import { ReviewCue } from '@/components/ReviewCue';
 import { cueForAttribute } from '@/components/reviewCueStatus';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { formatKcal } from '@/lib/format';
 
 export interface ClarificationCardProps {
@@ -34,14 +34,14 @@ export function ClarificationCard({
   // TODO(Clark): decide whether to show each option's kcal on the chip, how to
   // order cards (impact_kcal?), and whether answered cards collapse.
   return (
-    <Card className="space-y-3">
-      <div className="space-y-1">
-        <p className="text-muted text-xs font-medium tracking-wide uppercase">{item.name}</p>
-        <h3 className="text-base font-semibold">{a.question}</h3>
+    <Card className="gap-4">
+      <div className="space-y-2">
+        <p className="text-caption text-muted-foreground font-medium">{item.name}</p>
+        <h3 className="text-heading">{a.question}</h3>
         {cue && <ReviewCue attribute={a.attribute} status={cue} reason={a.reason} />}
         {a.status === 'answered' && (
-          <p className="text-muted flex items-center gap-1 text-sm">
-            <IconCheck className="size-4" />
+          <p className="text-label text-muted-foreground flex items-center gap-1.5 font-normal">
+            <Check className="size-4" strokeWidth={1.75} aria-hidden="true" />
             Updated from your answer{a.resolution?.text ? `: “${a.resolution.text}”` : ''}
           </p>
         )}
@@ -56,7 +56,9 @@ export function ClarificationCard({
             onClick={() => onAnswer({ kind: 'option', option_id: o.id })}
           >
             {o.label}
-            <span className="text-muted">· {formatKcal(o.nutrition.kcal)}</span>
+            <span className="text-muted-foreground font-normal tabular-nums">
+              · {formatKcal(o.nutrition.kcal)}
+            </span>
           </Chip>
         ))}
         <Chip
@@ -86,16 +88,15 @@ export function ClarificationCard({
           <label className="sr-only" htmlFor={`other-${a.id}`}>
             Your answer
           </label>
-          <input
+          <Input
             id={`other-${a.id}`}
-            className={inputClass}
             value={otherText}
             maxLength={200}
             onChange={(e) => setOtherText(e.target.value)}
             placeholder="Type your answer"
             autoFocus
           />
-          <Button type="submit" disabled={disabled || !otherText.trim()}>
+          <Button type="submit" variant="secondary" disabled={disabled || !otherText.trim()}>
             Save
           </Button>
         </form>

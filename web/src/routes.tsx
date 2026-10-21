@@ -36,7 +36,7 @@ export const routes: RouteObject[] = [
       { path: 'history', element: <HistoryList />, handle: h({ title: 'History' }) },
       { path: 'suggestions', element: <SuggestionsPage />, handle: h({ title: 'Suggestions' }) },
       { path: 'chat', element: <ChatPage />, handle: h({ title: 'Chat', back: true }) },
-      { path: 'settings', element: <SettingsPage />, handle: h({ title: 'Settings', back: true }) },
+      { path: 'settings', element: <SettingsPage />, handle: h({ title: 'Settings' }) },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

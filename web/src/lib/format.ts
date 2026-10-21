@@ -1,12 +1,25 @@
 import type { KcalRange, Nutrition, NutritionTotals } from '@/api/types';
 
 /**
- * Display helpers. The API sends unrounded floats (api-conventions §1); round
- * only here. Never format a missing value as 0 — callers pass null and get
- * a placeholder (ADR-0005).
+ * Display helpers (UI guidelines §6.1). The API sends unrounded floats
+ * (api-conventions §1); round only here. Never format a missing value as 0 —
+ * callers pass null and get the em-dash placeholder (ADR-0005).
+ *
+ * | Value       | Format                             | Example       |
+ * | ----------- | ---------------------------------- | ------------- |
+ * | Calories    | Integer with thousands separator   | 1,240 kcal    |
+ * | Macros      | Integer grams                      | 82 g          |
+ * | Range       | En dash, unit once                 | 520–680 kcal  |
+ * | Unknown     | Em dash, never 0                   | —             |
+ * | Percentages | Only goal progress, never confidence | 62% of goal |
  */
 
 const EN_DASH = '–';
+export const UNKNOWN = '—';
+
+function isMissing(n: number | null | undefined): n is null | undefined {
+  return n === null || n === undefined || Number.isNaN(n);
+}
 
 function roundInt(n: number): number {
   const r = Math.round(n);
@@ -25,15 +38,21 @@ export function roundGrams(n: number): number {
 
 const nf = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
+/** 1240.4 → "1,240" (no unit; for hero numbers where the unit is styled separately). */
+export function formatNumber(n: number | null | undefined, placeholder = UNKNOWN): string {
+  if (isMissing(n)) return placeholder;
+  return nf.format(roundInt(n));
+}
+
 /** 1523.4 → "1,523 kcal" */
-export function formatKcal(n: number | null | undefined, placeholder = '—'): string {
-  if (n === null || n === undefined || Number.isNaN(n)) return placeholder;
+export function formatKcal(n: number | null | undefined, placeholder = UNKNOWN): string {
+  if (isMissing(n)) return placeholder;
   return `${nf.format(roundKcal(n))} kcal`;
 }
 
 /** 31.6 → "32 g" */
-export function formatGrams(n: number | null | undefined, placeholder = '—'): string {
-  if (n === null || n === undefined || Number.isNaN(n)) return placeholder;
+export function formatGrams(n: number | null | undefined, placeholder = UNKNOWN): string {
+  if (isMissing(n)) return placeholder;
   return `${nf.format(roundGrams(n))} g`;
 }
 
@@ -51,11 +70,53 @@ export function formatItemKcal(nutrition: Nutrition, range: KcalRange | null): s
 }
 
 /** Meal/day totals: range when low/high differ meaningfully after rounding. */
-export function formatTotalsKcal(t: NutritionTotals | null | undefined, placeholder = '—'): string {
+export function formatTotalsKcal(
+  t: NutritionTotals | null | undefined,
+  placeholder = UNKNOWN,
+): string {
   if (!t) return placeholder;
-  return roundKcal(t.kcal_low) !== roundKcal(t.kcal_high)
-    ? formatKcalRange(t.kcal_low, t.kcal_high)
-    : formatKcal(t.kcal);
+  return hasKcalRange(t) ? formatKcalRange(t.kcal_low, t.kcal_high) : formatKcal(t.kcal);
+}
+
+/** True when the totals' low/high differ after rounding. */
+export function hasKcalRange(t: Pick<NutritionTotals, 'kcal_low' | 'kcal_high'>): boolean {
+  return roundKcal(t.kcal_low) !== roundKcal(t.kcal_high);
+}
+
+/** Totals kcal without the unit: "1,240" or "1,020–1,260" (unit styled separately). */
+export function formatTotalsKcalValue(
+  t: NutritionTotals | null | undefined,
+  placeholder = UNKNOWN,
+): string {
+  if (!t) return placeholder;
+  if (!hasKcalRange(t)) return formatNumber(t.kcal);
+  const lo = Math.min(t.kcal_low, t.kcal_high);
+  const hi = Math.max(t.kcal_low, t.kcal_high);
+  return `${formatNumber(lo)}${EN_DASH}${formatNumber(hi)}`;
+}
+
+/**
+ * Neutral remaining/over copy vs. a goal (§6.3): "860 kcal left",
+ * "120 kcal over goal", "At your goal". Never judgmental, never an error.
+ */
+export function formatGoalDelta(intake: number, goal: number, unit: 'kcal' | 'g' = 'kcal'): string {
+  const diff = roundInt(goal) - roundInt(intake);
+  const fmt = (n: number) => (unit === 'kcal' ? formatKcal(n) : formatGrams(n));
+  if (diff > 0) return `${fmt(diff)} left`;
+  if (diff < 0) return `${fmt(-diff)} over goal`;
+  return 'At your goal';
+}
+
+/** Goal progress only (never confidence): 0.62 of goal → "62% of goal". */
+export function formatPercentOfGoal(intake: number, goal: number): string {
+  if (!(goal > 0)) return UNKNOWN;
+  return `${nf.format(roundInt((intake / goal) * 100))}% of goal`;
+}
+
+/** Progress value for a bar, clamped to 0–100 (above 100 % the bar stays full, §5.2). */
+export function goalProgress(intake: number | null | undefined, goal: number | null | undefined) {
+  if (isMissing(intake) || isMissing(goal) || goal <= 0) return 0;
+  return Math.max(0, Math.min(100, (intake / goal) * 100));
 }
 
 /** "P 32 g · C 60 g · F 18 g" */
