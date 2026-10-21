@@ -1,0 +1,157 @@
+{
+  "image": {
+    "is_food": true,
+    "issues": [
+      "blurry"
+    ],
+    "note": "The photo is a little blurry, so some details may be off."
+  },
+  "items": [
+    {
+      "name": "Fettuccine Alfredo",
+      "kind": "dish",
+      "preparation": null,
+      "portion": {
+        "qty": 1.5,
+        "unit": "cup",
+        "grams": 330
+      },
+      "nutrition": {
+        "kcal": 780,
+        "protein_g": 24,
+        "carbs_g": 80,
+        "fat_g": 40
+      },
+      "uncertain_attributes": [
+        {
+          "attribute": "ingredient",
+          "reason": "The sauce looks creamy, but its base is not clear",
+          "question": "What kind of sauce was on the pasta?",
+          "options": [
+            {
+              "id": "alfredo",
+              "label": "Alfredo (butter, cream, cheese)",
+              "nutrition": {
+                "kcal": 780,
+                "protein_g": 24,
+                "carbs_g": 80,
+                "fat_g": 40
+              },
+              "portion": null
+            },
+            {
+              "id": "light_cream",
+              "label": "Light cream or milk-based",
+              "nutrition": {
+                "kcal": 600,
+                "protein_g": 24,
+                "carbs_g": 82,
+                "fat_g": 20
+              },
+              "portion": null
+            },
+            {
+              "id": "rosa",
+              "label": "Tomato cream (rosa) sauce",
+              "nutrition": {
+                "kcal": 650,
+                "protein_g": 22,
+                "carbs_g": 86,
+                "fat_g": 24
+              },
+              "portion": null
+            }
+          ],
+          "current_option_id": "alfredo"
+        },
+        {
+          "attribute": "portion",
+          "reason": "Plate depth makes the amount hard to judge",
+          "question": "About how much pasta did you eat?",
+          "options": [
+            {
+              "id": "one_cup",
+              "label": "1 cup",
+              "nutrition": {
+                "kcal": 520,
+                "protein_g": 16,
+                "carbs_g": 53.3,
+                "fat_g": 26.7
+              },
+              "portion": {
+                "qty": 1,
+                "unit": "cup",
+                "grams": 220
+              }
+            },
+            {
+              "id": "one_half_cups",
+              "label": "1½ cups",
+              "nutrition": {
+                "kcal": 780,
+                "protein_g": 24,
+                "carbs_g": 80,
+                "fat_g": 40
+              },
+              "portion": {
+                "qty": 1.5,
+                "unit": "cup",
+                "grams": 330
+              }
+            },
+            {
+              "id": "two_cups",
+              "label": "2 cups",
+              "nutrition": {
+                "kcal": 1040,
+                "protein_g": 32,
+                "carbs_g": 106.7,
+                "fat_g": 53.3
+              },
+              "portion": {
+                "qty": 2,
+                "unit": "cup",
+                "grams": 440
+              }
+            }
+          ],
+          "current_option_id": "one_half_cups"
+        }
+      ]
+    },
+    {
+      "name": "Grated parmesan",
+      "kind": "addon",
+      "preparation": null,
+      "portion": {
+        "qty": 1,
+        "unit": "tbsp",
+        "grams": 5
+      },
+      "nutrition": {
+        "kcal": 21,
+        "protein_g": 1.9,
+        "carbs_g": 0.2,
+        "fat_g": 1.4
+      },
+      "uncertain_attributes": []
+    },
+    {
+      "name": "Garlic bread",
+      "kind": "dish",
+      "preparation": "toasted",
+      "portion": {
+        "qty": 1,
+        "unit": "slice",
+        "grams": 50
+      },
+      "nutrition": {
+        "kcal": 170,
+        "protein_g": 4,
+        "carbs_g": 20,
+        "fat_g": 8
+      },
+      "uncertain_attributes": []
+    }
+  ]
+}

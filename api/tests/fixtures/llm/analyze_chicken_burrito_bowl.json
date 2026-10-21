@@ -1,0 +1,186 @@
+{
+  "image": {
+    "is_food": true,
+    "issues": [],
+    "note": null
+  },
+  "items": [
+    {
+      "name": "Chicken burrito bowl",
+      "kind": "dish",
+      "preparation": "grilled",
+      "portion": {
+        "qty": 1,
+        "unit": "bowl",
+        "grams": 480
+      },
+      "nutrition": {
+        "kcal": 680,
+        "protein_g": 45,
+        "carbs_g": 78,
+        "fat_g": 20
+      },
+      "uncertain_attributes": [
+        {
+          "attribute": "portion",
+          "reason": "Bowl size is hard to judge from one photo",
+          "question": "How big was the bowl?",
+          "options": [
+            {
+              "id": "smaller",
+              "label": "Smaller bowl",
+              "nutrition": {
+                "kcal": 510,
+                "protein_g": 33.75,
+                "carbs_g": 58.5,
+                "fat_g": 15
+              },
+              "portion": {
+                "qty": 0.75,
+                "unit": "bowl",
+                "grams": 360
+              }
+            },
+            {
+              "id": "regular",
+              "label": "Regular bowl",
+              "nutrition": {
+                "kcal": 680,
+                "protein_g": 45,
+                "carbs_g": 78,
+                "fat_g": 20
+              },
+              "portion": {
+                "qty": 1,
+                "unit": "bowl",
+                "grams": 480
+              }
+            },
+            {
+              "id": "large",
+              "label": "Large bowl",
+              "nutrition": {
+                "kcal": 850,
+                "protein_g": 56.25,
+                "carbs_g": 97.5,
+                "fat_g": 25
+              },
+              "portion": {
+                "qty": 1.25,
+                "unit": "bowl",
+                "grams": 600
+              }
+            }
+          ],
+          "current_option_id": "regular"
+        },
+        {
+          "attribute": "preparation",
+          "reason": "The chicken could be grilled or fried",
+          "question": "How was the chicken cooked?",
+          "options": [
+            {
+              "id": "grilled",
+              "label": "Grilled",
+              "nutrition": {
+                "kcal": 680,
+                "protein_g": 45,
+                "carbs_g": 78,
+                "fat_g": 20
+              },
+              "portion": null
+            },
+            {
+              "id": "fried",
+              "label": "Fried",
+              "nutrition": {
+                "kcal": 820,
+                "protein_g": 43,
+                "carbs_g": 92,
+                "fat_g": 31
+              },
+              "portion": null
+            }
+          ],
+          "current_option_id": "grilled"
+        }
+      ]
+    },
+    {
+      "name": "Sour cream",
+      "kind": "addon",
+      "preparation": null,
+      "portion": {
+        "qty": 2,
+        "unit": "tbsp",
+        "grams": 30
+      },
+      "nutrition": {
+        "kcal": 60,
+        "protein_g": 0.7,
+        "carbs_g": 1.4,
+        "fat_g": 5.8
+      },
+      "uncertain_attributes": [
+        {
+          "attribute": "identity",
+          "reason": "The white topping could be sour cream or queso",
+          "question": "Which topping was it?",
+          "options": [
+            {
+              "id": "sour_cream",
+              "label": "Sour cream",
+              "nutrition": {
+                "kcal": 60,
+                "protein_g": 0.7,
+                "carbs_g": 1.4,
+                "fat_g": 5.8
+              },
+              "portion": null
+            },
+            {
+              "id": "queso",
+              "label": "Queso",
+              "nutrition": {
+                "kcal": 100,
+                "protein_g": 4,
+                "carbs_g": 2,
+                "fat_g": 8.5
+              },
+              "portion": null
+            },
+            {
+              "id": "none",
+              "label": "No creamy topping",
+              "nutrition": {
+                "kcal": 0,
+                "protein_g": 0,
+                "carbs_g": 0,
+                "fat_g": 0
+              },
+              "portion": null
+            }
+          ],
+          "current_option_id": "sour_cream"
+        }
+      ]
+    },
+    {
+      "name": "Salsa",
+      "kind": "addon",
+      "preparation": null,
+      "portion": {
+        "qty": 2,
+        "unit": "tbsp",
+        "grams": 32
+      },
+      "nutrition": {
+        "kcal": 10,
+        "protein_g": 0.5,
+        "carbs_g": 2,
+        "fat_g": 0.1
+      },
+      "uncertain_attributes": []
+    }
+  ]
+}

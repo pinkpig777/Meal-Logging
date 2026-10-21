@@ -1,0 +1,28 @@
+{
+  "_comment": "Fixture-mode LLM responses (LLM_MODE=fixture). Selection order: exact key (photo filename stem or sha256(text)[:12]) in 'keys', then the first 'keywords' entry contained in the text, then 'default'.",
+  "default": "chicken_burrito_bowl",
+  "analyses": {
+    "chicken_burrito_bowl": "analyze_chicken_burrito_bowl.json",
+    "chicken_rice_broccoli": "analyze_chicken_rice_broccoli.json",
+    "pasta_cream_sauce": "analyze_pasta_cream_sauce.json",
+    "not_food": "analyze_not_food.json"
+  },
+  "keys": {
+    "burrito_bowl": "chicken_burrito_bowl",
+    "chicken_rice_broccoli": "chicken_rice_broccoli",
+    "pasta_cream_sauce": "pasta_cream_sauce",
+    "not_food": "not_food"
+  },
+  "keywords": {
+    "burrito": "chicken_burrito_bowl",
+    "bowl": "chicken_burrito_bowl",
+    "rice": "chicken_rice_broccoli",
+    "broccoli": "chicken_rice_broccoli",
+    "pasta": "pasta_cream_sauce",
+    "alfredo": "pasta_cream_sauce",
+    "fettuccine": "pasta_cream_sauce",
+    "not food": "not_food",
+    "keyboard": "not_food"
+  },
+  "estimate_item_default": "estimate_item_default.json"
+}

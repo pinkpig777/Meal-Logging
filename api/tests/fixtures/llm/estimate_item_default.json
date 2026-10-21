@@ -1,0 +1,19 @@
+{
+  "item": {
+    "name": "Custom item",
+    "kind": "dish",
+    "preparation": null,
+    "portion": {
+      "qty": 1,
+      "unit": "serving",
+      "grams": 200
+    },
+    "nutrition": {
+      "kcal": 300,
+      "protein_g": 15,
+      "carbs_g": 30,
+      "fat_g": 13
+    },
+    "uncertain_attributes": []
+  }
+}

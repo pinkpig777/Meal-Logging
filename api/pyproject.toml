@@ -1,0 +1,66 @@
+[project]
+name = "meal-logging-api"
+version = "0.1.0"
+description = "FastAPI backend for the Meal Logging app"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard]>=0.158.0",
+    "httpx>=0.28.1",
+    "openai>=3.36.0",
+    "pydantic>=2",
+    "pydantic-settings>=2.16.1",
+    "pyjwt>=2.15.1",
+    "supabase>=2.33.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "SIM", # flake8-simplify
+  "C4",  # flake8-comprehensions
+  "RUF", # ruff-specific
+]
+ignore = [
+  "B008",   # FastAPI uses calls in defaults (Depends/Query)
+  "RUF001", # allow typographic characters (½, –) in strings
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra -m 'not live'"
+markers = [
+  "live: calls real external services (OpenAI); opt-in with `uv run pytest -m live`",
+]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.12"
+include = ["app", "tests", "scripts"]
+venvPath = "."
+venv = ".venv"

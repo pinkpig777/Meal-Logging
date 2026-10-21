@@ -1,0 +1,3435 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Meal Logging API",
+    "version": "0.0.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health",
+        "description": "Liveness; no auth.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config/models": {
+      "get": {
+        "tags": [
+          "recognition"
+        ],
+        "summary": "List Analysis Models",
+        "description": "Allowed analysis models (ADR-0006).",
+        "operationId": "list_analysis_models",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisModelsResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/meals/analyze": {
+      "post": {
+        "tags": [
+          "recognition"
+        ],
+        "summary": "Analyze Meal",
+        "description": "Photo and/or text → draft meal, with `asked` set by the clarification policy.\n\nOn an LLM failure the meal is kept with `status: failed`; its id is in `error.details.meal_id`.",
+        "operationId": "analyze_meal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/meals/{id}/items/{item_id}/reestimate": {
+      "post": {
+        "tags": [
+          "recognition"
+        ],
+        "summary": "Reestimate Item",
+        "description": "Re-estimate one item after an identity or preparation change.",
+        "operationId": "reestimate_item",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReestimateItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/clarify": {
+      "post": {
+        "tags": [
+          "clarification"
+        ],
+        "summary": "Clarify Meal",
+        "description": "Answer an uncertain attribute: option (no LLM call), not_sure, or other (re-estimate).",
+        "operationId": "clarify_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClarifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/draft": {
+      "patch": {
+        "tags": [
+          "clarification"
+        ],
+        "summary": "Edit Draft Meal",
+        "description": "Edit a draft: meal fields, item portions and values, remove items.",
+        "operationId": "edit_draft_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/items": {
+      "post": {
+        "tags": [
+          "clarification"
+        ],
+        "summary": "Add Meal Item",
+        "description": "Add an item; estimated (text-only) if nutrition is omitted.",
+        "operationId": "add_meal_item",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/confirm": {
+      "post": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Confirm Meal",
+        "description": "Confirm a draft. Confirmed meals count toward analytics and suggestions.",
+        "operationId": "confirm_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals": {
+      "get": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "List Meals",
+        "description": "Meals in a local-date range (default: last 7 days), newest first.",
+        "operationId": "list_meals",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/MealStatus",
+              "default": "confirmed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MealListResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}": {
+      "get": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Get Meal",
+        "operationId": "get_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Edit Confirmed Meal",
+        "description": "Edit a confirmed meal in place (same body as the draft PATCH); it stays confirmed.",
+        "operationId": "edit_confirmed_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MealEditRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Delete Meal",
+        "description": "Hard delete; items and attributes cascade; the photo object is removed.",
+        "operationId": "delete_meal",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/meals/{id}/photo": {
+      "delete": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Delete Meal Photo",
+        "description": "Delete only the photo; nutrition records remain.",
+        "operationId": "delete_meal_photo",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/goals": {
+      "get": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Get Goals",
+        "operationId": "get_goals",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoalsResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Create Goal",
+        "description": "Set a new goal from `effective_from` (default today); replaces a same-day goal.",
+        "operationId": "create_goal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Goal"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Get Me",
+        "description": "Current user's profile. A valid `X-Timezone` header updates `timezone` when it changed.",
+        "operationId": "get_me",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "x-timezone",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Browser IANA time zone",
+              "title": "X-Timezone"
+            },
+            "description": "Browser IANA time zone"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "meals"
+        ],
+        "summary": "Update Me",
+        "operationId": "update_me",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Profile"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/daily": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "summary": "Get Daily Analytics",
+        "description": "One day: totals vs. goal and each meal's contribution (default: today).",
+        "operationId": "get_daily_analytics",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyAnalytics"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/weekly": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "summary": "Get Weekly Analytics",
+        "description": "Seven days from `start` (default: Monday of the current week); unlogged days are null.",
+        "operationId": "get_weekly_analytics",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Start"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyAnalytics"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/history": {
+      "get": {
+        "tags": [
+          "analytics"
+        ],
+        "summary": "Get History Analytics",
+        "description": "Day series over a date range (at most 92 days).",
+        "operationId": "get_history_analytics",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "From"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "title": "To"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryAnalytics"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recommendations": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Get Recommendations",
+        "description": "Current suggestions with evidence; `insufficient_history` below 3 logged days.",
+        "operationId": "get_recommendations",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recommendations/feedback": {
+      "post": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Post Recommendation Feedback",
+        "operationId": "post_recommendation_feedback",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestionFeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chat": {
+      "post": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Post Chat",
+        "description": "Grounded chat (scope TBD). Currently returns a placeholder reply.",
+        "operationId": "post_chat",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Client error (see error.code)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Server or upstream LLM error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddItemRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "portion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Portion"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Required when nutrition is given; estimated otherwise"
+          },
+          "nutrition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Nutrition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null → estimated by M1 (text-only)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AddItemRequest"
+      },
+      "AnalysisModelInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "description"
+        ],
+        "title": "AnalysisModelInfo"
+      },
+      "AnalysisModelsResponse": {
+        "properties": {
+          "default": {
+            "type": "string",
+            "title": "Default"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/AnalysisModelInfo"
+            },
+            "type": "array",
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "default",
+          "models"
+        ],
+        "title": "AnalysisModelsResponse"
+      },
+      "AnalyzeMealRequest": {
+        "properties": {
+          "photo_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Path",
+            "description": "Storage path under the caller's folder: {user_id}/{photo_id}.jpg"
+          },
+          "text_input": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Input"
+          },
+          "eaten_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eaten At",
+            "description": "Defaults to now; a past value backfills"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MealType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Inferred from the local time if omitted"
+          }
+        },
+        "type": "object",
+        "title": "AnalyzeMealRequest"
+      },
+      "AttributeKind": {
+        "type": "string",
+        "enum": [
+          "identity",
+          "portion",
+          "preparation",
+          "ingredient"
+        ],
+        "title": "AttributeKind"
+      },
+      "AttributeOption": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Stable within the attribute, e.g. \"fried\""
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "nutrition": {
+            "$ref": "#/components/schemas/Nutrition",
+            "description": "The item's full estimate if this option is chosen"
+          },
+          "portion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Portion"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set only for attribute = \"portion\""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "nutrition",
+          "portion"
+        ],
+        "title": "AttributeOption"
+      },
+      "AttributeResolution": {
+        "properties": {
+          "option_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Option Id"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "option_id",
+          "text"
+        ],
+        "title": "AttributeResolution"
+      },
+      "ChatMessage": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage"
+      },
+      "ChatReferences": {
+        "properties": {
+          "meal_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Meal Ids"
+          },
+          "dates": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Dates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "meal_ids",
+          "dates"
+        ],
+        "title": "ChatReferences"
+      },
+      "ChatRequest": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          "references": {
+            "$ref": "#/components/schemas/ChatReferences"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "references"
+        ],
+        "title": "ChatResponse"
+      },
+      "ClarifyRequest": {
+        "properties": {
+          "attribute_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Attribute Id"
+          },
+          "answer": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OptionAnswer"
+              },
+              {
+                "$ref": "#/components/schemas/NotSureAnswer"
+              },
+              {
+                "$ref": "#/components/schemas/OtherAnswer"
+              }
+            ],
+            "title": "Answer",
+            "discriminator": {
+              "propertyName": "kind",
+              "mapping": {
+                "not_sure": "#/components/schemas/NotSureAnswer",
+                "option": "#/components/schemas/OptionAnswer",
+                "other": "#/components/schemas/OtherAnswer"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "attribute_id",
+          "answer"
+        ],
+        "title": "ClarifyRequest"
+      },
+      "DailyAnalytics": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "logged": {
+            "type": "boolean",
+            "title": "Logged"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Goal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutritionTotals"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meals": {
+            "items": {
+              "$ref": "#/components/schemas/MealContribution"
+            },
+            "type": "array",
+            "title": "Meals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "logged",
+          "goal",
+          "totals",
+          "meals"
+        ],
+        "title": "DailyAnalytics"
+      },
+      "DayPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "logged": {
+            "type": "boolean",
+            "title": "Logged",
+            "description": "false → totals is null (unknown, not zero)"
+          },
+          "meal_count": {
+            "type": "integer",
+            "title": "Meal Count"
+          },
+          "totals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutritionTotals"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Goal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Effective goal for that date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "logged",
+          "meal_count",
+          "totals",
+          "goal"
+        ],
+        "title": "DayPoint"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Stable UPPER_SNAKE_CASE code; clients branch on it"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable sentence, safe to show the user"
+          },
+          "details": {
+            "title": "Details"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message",
+          "details",
+          "request_id"
+        ],
+        "title": "ErrorBody"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          }
+        },
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse"
+      },
+      "Goal": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "effective_from": {
+            "type": "string",
+            "format": "date",
+            "title": "Effective From"
+          },
+          "kcal": {
+            "type": "integer",
+            "title": "Kcal"
+          },
+          "protein_g": {
+            "type": "number",
+            "title": "Protein G"
+          },
+          "carbs_g": {
+            "type": "number",
+            "title": "Carbs G"
+          },
+          "fat_g": {
+            "type": "number",
+            "title": "Fat G"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "effective_from",
+          "kcal",
+          "protein_g",
+          "carbs_g",
+          "fat_g"
+        ],
+        "title": "Goal"
+      },
+      "GoalCreate": {
+        "properties": {
+          "kcal": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Kcal"
+          },
+          "protein_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Protein G"
+          },
+          "carbs_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Carbs G"
+          },
+          "fat_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Fat G"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From",
+            "description": "Defaults to today in the user's time zone"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kcal",
+          "protein_g",
+          "carbs_g",
+          "fat_g"
+        ],
+        "title": "GoalCreate"
+      },
+      "GoalsResponse": {
+        "properties": {
+          "current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Goal"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Effective goal for today; null if none yet"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/Goal"
+            },
+            "type": "array",
+            "title": "History",
+            "description": "All goals, newest effective_from first"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current",
+          "history"
+        ],
+        "title": "GoalsResponse"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "app_env": {
+            "type": "string",
+            "title": "App Env"
+          },
+          "auth_mode": {
+            "type": "string",
+            "title": "Auth Mode"
+          },
+          "llm_mode": {
+            "type": "string",
+            "title": "Llm Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "app_env",
+          "auth_mode",
+          "llm_mode"
+        ],
+        "title": "HealthResponse"
+      },
+      "HistoryAnalytics": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayPoint"
+            },
+            "type": "array",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "HistoryAnalytics"
+      },
+      "ImageIssue": {
+        "type": "string",
+        "enum": [
+          "blurry",
+          "dark",
+          "partial",
+          "multiple_meals",
+          "obstructed"
+        ],
+        "title": "ImageIssue"
+      },
+      "ItemKind": {
+        "type": "string",
+        "enum": [
+          "dish",
+          "addon"
+        ],
+        "title": "ItemKind"
+      },
+      "ItemRemoveOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "remove",
+            "title": "Op"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "id"
+        ],
+        "title": "ItemRemoveOp"
+      },
+      "ItemSource": {
+        "type": "string",
+        "enum": [
+          "ai",
+          "ai_clarified",
+          "user_edited",
+          "user_added"
+        ],
+        "title": "ItemSource"
+      },
+      "ItemUpdateOp": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "update",
+            "title": "Op"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preparation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preparation"
+          },
+          "portion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Portion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nutrition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Nutrition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "op",
+          "id"
+        ],
+        "title": "ItemUpdateOp"
+      },
+      "KcalRange": {
+        "properties": {
+          "low": {
+            "type": "number",
+            "title": "Low"
+          },
+          "high": {
+            "type": "number",
+            "title": "High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "low",
+          "high"
+        ],
+        "title": "KcalRange"
+      },
+      "Meal": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MealStatus"
+          },
+          "meal_type": {
+            "$ref": "#/components/schemas/MealType"
+          },
+          "eaten_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Eaten At"
+          },
+          "local_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Local Date"
+          },
+          "text_input": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Input"
+          },
+          "photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Url",
+            "description": "Short-lived signed URL"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "image_issues": {
+            "items": {
+              "$ref": "#/components/schemas/ImageIssue"
+            },
+            "type": "array",
+            "title": "Image Issues"
+          },
+          "failure_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Reason"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MealItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/NutritionTotals"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "confirmed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "meal_type",
+          "eaten_at",
+          "local_date",
+          "text_input",
+          "photo_url",
+          "model_version",
+          "image_issues",
+          "failure_reason",
+          "items",
+          "totals",
+          "created_at",
+          "updated_at",
+          "confirmed_at"
+        ],
+        "title": "Meal"
+      },
+      "MealContribution": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MealStatus"
+          },
+          "meal_type": {
+            "$ref": "#/components/schemas/MealType"
+          },
+          "eaten_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Eaten At"
+          },
+          "local_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Local Date"
+          },
+          "photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Url"
+          },
+          "item_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Item Names"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/NutritionTotals"
+          },
+          "share": {
+            "$ref": "#/components/schemas/Nutrition",
+            "description": "Fraction of the day's total for each metric, 0–1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "meal_type",
+          "eaten_at",
+          "local_date",
+          "photo_url",
+          "item_names",
+          "totals",
+          "share"
+        ],
+        "title": "MealContribution"
+      },
+      "MealEditRequest": {
+        "properties": {
+          "meal_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MealType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "eaten_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eaten At"
+          },
+          "items": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ItemUpdateOp"
+                },
+                {
+                  "$ref": "#/components/schemas/ItemRemoveOp"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "op",
+                "mapping": {
+                  "remove": "#/components/schemas/ItemRemoveOp",
+                  "update": "#/components/schemas/ItemUpdateOp"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "title": "MealEditRequest",
+        "description": "Body of `PATCH /meals/{id}/draft` and `PATCH /meals/{id}`."
+      },
+      "MealItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "position": {
+            "type": "integer",
+            "title": "Position"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ItemKind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "preparation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preparation"
+          },
+          "portion": {
+            "$ref": "#/components/schemas/Portion"
+          },
+          "nutrition": {
+            "$ref": "#/components/schemas/Nutrition"
+          },
+          "kcal_range": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/KcalRange"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "null when unresolved options do not spread meaningfully"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ItemSource"
+          },
+          "uncertain_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/UncertainAttribute"
+            },
+            "type": "array",
+            "title": "Uncertain Attributes"
+          },
+          "ai_original": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ai Original",
+            "description": "Immutable snapshot of the AI's first estimate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "position",
+          "kind",
+          "name",
+          "preparation",
+          "portion",
+          "nutrition",
+          "kcal_range",
+          "source",
+          "uncertain_attributes",
+          "ai_original"
+        ],
+        "title": "MealItem"
+      },
+      "MealListResponse": {
+        "properties": {
+          "meals": {
+            "items": {
+              "$ref": "#/components/schemas/MealSummary"
+            },
+            "type": "array",
+            "title": "Meals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "meals"
+        ],
+        "title": "MealListResponse"
+      },
+      "MealStatus": {
+        "type": "string",
+        "enum": [
+          "analyzing",
+          "draft",
+          "confirmed",
+          "failed"
+        ],
+        "title": "MealStatus"
+      },
+      "MealSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MealStatus"
+          },
+          "meal_type": {
+            "$ref": "#/components/schemas/MealType"
+          },
+          "eaten_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Eaten At"
+          },
+          "local_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Local Date"
+          },
+          "photo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Photo Url"
+          },
+          "item_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Item Names"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/NutritionTotals"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "meal_type",
+          "eaten_at",
+          "local_date",
+          "photo_url",
+          "item_names",
+          "totals"
+        ],
+        "title": "MealSummary"
+      },
+      "MealType": {
+        "type": "string",
+        "enum": [
+          "breakfast",
+          "lunch",
+          "dinner",
+          "snack"
+        ],
+        "title": "MealType"
+      },
+      "NotSureAnswer": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "not_sure",
+            "title": "Kind"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "NotSureAnswer"
+      },
+      "Nutrition": {
+        "properties": {
+          "kcal": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Kcal"
+          },
+          "protein_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Protein G"
+          },
+          "carbs_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Carbs G"
+          },
+          "fat_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Fat G"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kcal",
+          "protein_g",
+          "carbs_g",
+          "fat_g"
+        ],
+        "title": "Nutrition"
+      },
+      "NutritionTotals": {
+        "properties": {
+          "kcal": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Kcal"
+          },
+          "protein_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Protein G"
+          },
+          "carbs_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Carbs G"
+          },
+          "fat_g": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Fat G"
+          },
+          "kcal_low": {
+            "type": "number",
+            "title": "Kcal Low"
+          },
+          "kcal_high": {
+            "type": "number",
+            "title": "Kcal High"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kcal",
+          "protein_g",
+          "carbs_g",
+          "fat_g",
+          "kcal_low",
+          "kcal_high"
+        ],
+        "title": "NutritionTotals"
+      },
+      "OptionAnswer": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "option",
+            "title": "Kind"
+          },
+          "option_id": {
+            "type": "string",
+            "title": "Option Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "option_id"
+        ],
+        "title": "OptionAnswer"
+      },
+      "OtherAnswer": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "other",
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "text"
+        ],
+        "title": "OtherAnswer"
+      },
+      "Portion": {
+        "properties": {
+          "qty": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Qty",
+            "description": "e.g. 1.5"
+          },
+          "unit": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Unit",
+            "description": "Familiar unit: \"cup\", \"piece\", \"slice\", \"tbsp\", \"g\""
+          },
+          "grams": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Grams",
+            "description": "Estimated weight in grams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "qty",
+          "unit",
+          "grams"
+        ],
+        "title": "Portion"
+      },
+      "Profile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "timezone": {
+            "type": "string",
+            "title": "Timezone"
+          },
+          "dietary_restrictions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Dietary Restrictions"
+          },
+          "analysis_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Model",
+            "description": "null = server default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "display_name",
+          "avatar_url",
+          "timezone",
+          "dietary_restrictions",
+          "analysis_model"
+        ],
+        "title": "Profile"
+      },
+      "ProfileUpdate": {
+        "properties": {
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "IANA name, e.g. America/Chicago"
+          },
+          "dietary_restrictions": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietary Restrictions"
+          },
+          "analysis_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Model",
+            "description": "null resets to the server default"
+          }
+        },
+        "type": "object",
+        "title": "ProfileUpdate"
+      },
+      "RecommendationsResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "insufficient_history"
+            ],
+            "title": "Status"
+          },
+          "logged_day_count": {
+            "type": "integer",
+            "title": "Logged Day Count"
+          },
+          "required_day_count": {
+            "type": "integer",
+            "title": "Required Day Count"
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/Suggestion"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "logged_day_count",
+          "required_day_count",
+          "suggestions"
+        ],
+        "title": "RecommendationsResponse"
+      },
+      "ReestimateItemRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preparation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preparation"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "title": "ReestimateItemRequest"
+      },
+      "ResolutionStatus": {
+        "type": "string",
+        "enum": [
+          "unresolved",
+          "answered",
+          "not_sure"
+        ],
+        "title": "ResolutionStatus"
+      },
+      "Suggestion": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "pattern": {
+            "$ref": "#/components/schemas/SuggestionPattern"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "ideas": {
+            "items": {
+              "$ref": "#/components/schemas/SuggestionIdea"
+            },
+            "type": "array",
+            "title": "Ideas"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/SuggestionEvidence"
+          },
+          "caveats": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Caveats"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "pattern",
+          "title",
+          "ideas",
+          "evidence",
+          "caveats"
+        ],
+        "title": "Suggestion"
+      },
+      "SuggestionEvidence": {
+        "properties": {
+          "dates": {
+            "items": {
+              "type": "string",
+              "format": "date"
+            },
+            "type": "array",
+            "title": "Dates"
+          },
+          "meal_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Meal Ids"
+          },
+          "observations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Observations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dates",
+          "meal_ids",
+          "observations"
+        ],
+        "title": "SuggestionEvidence"
+      },
+      "SuggestionFeedbackRequest": {
+        "properties": {
+          "suggestion": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Suggestion",
+            "description": "Snapshot of the suggestion shown"
+          },
+          "response": {
+            "$ref": "#/components/schemas/SuggestionResponse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "suggestion",
+          "response"
+        ],
+        "title": "SuggestionFeedbackRequest"
+      },
+      "SuggestionIdea": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "estimated_nutrition": {
+            "$ref": "#/components/schemas/Nutrition"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "estimated_nutrition"
+        ],
+        "title": "SuggestionIdea"
+      },
+      "SuggestionPattern": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "title": "Metric",
+            "description": "e.g. \"protein_g\""
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "summary"
+        ],
+        "title": "SuggestionPattern"
+      },
+      "SuggestionResponse": {
+        "type": "string",
+        "enum": [
+          "useful",
+          "not_for_me",
+          "already_do"
+        ],
+        "title": "SuggestionResponse"
+      },
+      "UncertainAttribute": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "attribute": {
+            "$ref": "#/components/schemas/AttributeKind"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeOption"
+            },
+            "type": "array",
+            "title": "Options"
+          },
+          "current_option_id": {
+            "type": "string",
+            "title": "Current Option Id"
+          },
+          "impact_kcal": {
+            "type": "number",
+            "title": "Impact Kcal",
+            "description": "max - min kcal across options"
+          },
+          "asked": {
+            "type": "boolean",
+            "title": "Asked",
+            "description": "Selected by the clarification policy"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ResolutionStatus"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttributeResolution"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "attribute",
+          "reason",
+          "question",
+          "options",
+          "current_option_id",
+          "impact_kcal",
+          "asked",
+          "status",
+          "resolution"
+        ],
+        "title": "UncertainAttribute"
+      },
+      "WeeklyAnalytics": {
+        "properties": {
+          "start": {
+            "type": "string",
+            "format": "date",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date",
+            "title": "End"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayPoint"
+            },
+            "type": "array",
+            "title": "Days",
+            "description": "Always 7 entries, one per date"
+          },
+          "logged_day_count": {
+            "type": "integer",
+            "title": "Logged Day Count"
+          },
+          "averages": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Nutrition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Averages over logged days only"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "days",
+          "logged_day_count",
+          "averages"
+        ],
+        "title": "WeeklyAnalytics"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "Supabase access token",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

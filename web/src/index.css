@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens (Tailwind v4 is configured in CSS, not tailwind.config.js).
+ * Semantic colors are CSS variables so dark mode only swaps values.
+ * Use the semantic names (bg-surface, text-muted, border-line, bg-accent, ...)
+ * rather than raw palette colors in components.
+ */
+:root {
+  --c-bg: #f6f7f9;
+  --c-surface: #ffffff;
+  --c-surface-2: #eef0f3;
+  --c-text: #14171c;
+  --c-muted: #5b6370;
+  --c-line: #dde1e6;
+  --c-accent: #0d9488;
+  --c-accent-fg: #ffffff;
+  --c-accent-soft: #ccfbf1;
+  --c-review: #b45309;
+  --c-review-soft: #fef3c7;
+  --c-danger: #b91c1c;
+  --c-danger-soft: #fee2e2;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #0f1115;
+    --c-surface: #181b21;
+    --c-surface-2: #22262e;
+    --c-text: #eceef2;
+    --c-muted: #9aa3b0;
+    --c-line: #2e333c;
+    --c-accent: #2dd4bf;
+    --c-accent-fg: #042f2e;
+    --c-accent-soft: #134e4a;
+    --c-review: #fbbf24;
+    --c-review-soft: #422006;
+    --c-danger: #f87171;
+    --c-danger-soft: #450a0a;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-text: var(--c-text);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --color-accent: var(--c-accent);
+  --color-accent-fg: var(--c-accent-fg);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-review: var(--c-review);
+  --color-review-soft: var(--c-review-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+}
+
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --spacing-touch: 2.75rem; /* 44px minimum touch target */
+  --spacing-nav: 4rem; /* bottom nav height, excluding safe area */
+  --container-app: 30rem; /* max content width (~480px) on larger screens */
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+html,
+body {
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply font-sans antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+}

@@ -1,0 +1,129 @@
+{
+  "image": {
+    "is_food": true,
+    "issues": [],
+    "note": null
+  },
+  "items": [
+    {
+      "name": "Grilled chicken breast",
+      "kind": "dish",
+      "preparation": "grilled",
+      "portion": {
+        "qty": 1,
+        "unit": "piece",
+        "grams": 170
+      },
+      "nutrition": {
+        "kcal": 280,
+        "protein_g": 52,
+        "carbs_g": 0,
+        "fat_g": 6.5
+      },
+      "uncertain_attributes": []
+    },
+    {
+      "name": "White rice",
+      "kind": "dish",
+      "preparation": "steamed",
+      "portion": {
+        "qty": 1,
+        "unit": "cup",
+        "grams": 158
+      },
+      "nutrition": {
+        "kcal": 205,
+        "protein_g": 4.3,
+        "carbs_g": 45,
+        "fat_g": 0.4
+      },
+      "uncertain_attributes": [
+        {
+          "attribute": "portion",
+          "reason": "Scale is unclear from one photo",
+          "question": "About how much rice did you eat?",
+          "options": [
+            {
+              "id": "half_cup",
+              "label": "½ cup",
+              "nutrition": {
+                "kcal": 102.5,
+                "protein_g": 2.15,
+                "carbs_g": 22.5,
+                "fat_g": 0.2
+              },
+              "portion": {
+                "qty": 0.5,
+                "unit": "cup",
+                "grams": 79
+              }
+            },
+            {
+              "id": "one_cup",
+              "label": "1 cup",
+              "nutrition": {
+                "kcal": 205,
+                "protein_g": 4.3,
+                "carbs_g": 45,
+                "fat_g": 0.4
+              },
+              "portion": {
+                "qty": 1,
+                "unit": "cup",
+                "grams": 158
+              }
+            },
+            {
+              "id": "one_half_cups",
+              "label": "1½ cups",
+              "nutrition": {
+                "kcal": 307.5,
+                "protein_g": 6.45,
+                "carbs_g": 67.5,
+                "fat_g": 0.6
+              },
+              "portion": {
+                "qty": 1.5,
+                "unit": "cup",
+                "grams": 237
+              }
+            },
+            {
+              "id": "two_cups",
+              "label": "2 cups",
+              "nutrition": {
+                "kcal": 410,
+                "protein_g": 8.6,
+                "carbs_g": 90,
+                "fat_g": 0.8
+              },
+              "portion": {
+                "qty": 2,
+                "unit": "cup",
+                "grams": 316
+              }
+            }
+          ],
+          "current_option_id": "one_cup"
+        }
+      ]
+    },
+    {
+      "name": "Broccoli",
+      "kind": "dish",
+      "preparation": "steamed",
+      "portion": {
+        "qty": 1,
+        "unit": "cup",
+        "grams": 91
+      },
+      "nutrition": {
+        "kcal": 31,
+        "protein_g": 2.5,
+        "carbs_g": 6,
+        "fat_g": 0.3
+      },
+      "uncertain_attributes": []
+    }
+  ]
+}
