@@ -139,11 +139,12 @@ Then open http://localhost:5173 and confirm the Today page loads with seeded dat
 
 ### 4.1 Per task
 
-1. `git switch main && git pull && git switch -c <type>/<module>-<desc>` (e.g. `feat/m4-week-chart`).
+1. `git switch main && git pull && git switch -c <type>/<module>-<desc>` (e.g. `feat/m4-week-chart`). **Never commit to `main`.** It is protected; pushes are rejected and changes land only through PRs with passing CI.
 2. Implement with tests (see `docs/07-engineering/testing-strategy.md`; the default suite must run offline).
 3. Run all checks (§5) and fix failures.
 4. Commit with Conventional Commits: `feat(m4): add weekly calorie chart`.
-5. Push and open a PR using the template in `docs/07-engineering/dev-workflow.md`. Include phone-width screenshots for UI changes.
+5. Push the branch (`git push -u origin HEAD`) and open a PR (`gh pr create`). Fill in the PR template; include 375 px screenshots in light and dark for UI changes.
+6. If CI fails, fix it on the same branch and push again. Merge only after both checks pass.
 
 ### 4.2 When you change an API contract
 
