@@ -9,6 +9,11 @@
 ## 1. Branching (GitHub flow)
 
 - `main` is always deployable; Vercel and Render deploy from it.
+- **`main` is protected** (GitHub ruleset in `.github/rulesets/protect-main.json`):
+  - No direct pushes. Every change reaches `main` through a pull request.
+  - Both CI jobs must pass before merging: `API (lint, types, tests)` and `Web (lint, types, tests, build)`.
+  - Force-pushes to and deletion of `main` are blocked.
+  - No approval is required, and nobody can bypass the rules, admins included.
 - Create a short-lived branch per change: `<type>/<module>-<short-description>`.
   - Examples: `feat/m2-question-policy`, `fix/m4-unlogged-day-bar`, `docs/m5-pattern-rules`, `chore/deps-upgrade`.
 - Merge through a pull request, then delete the branch.
@@ -16,13 +21,15 @@
 ## 2. Pull requests
 
 - Keep PRs small and focused on one concern, ideally under ~400 changed lines.
-- CI must pass before merging.
+- Fill in the PR template (`.github/pull_request_template.md`); it loads automatically.
+- CI must pass before merging (enforced). If CI fails, push fixes to the same branch.
 - No approval is required. Request a review when a PR:
   - changes a **shared** area (`api/app/core`, `api/app/schemas`, `api/app/services`, `web/src/lib`, `web/src/components`, `supabase/migrations`), or
   - changes an API contract another module consumes.
 
   In those cases, @-mention the affected owners in the PR description.
-- Merge with **squash merge**, so `main` has one commit per PR.
+- Any merge method is allowed. Squash merge is recommended for PRs with messy commit history.
+- Delete the branch after merging.
 
 ### PR description template
 
@@ -87,3 +94,16 @@ uv run ruff check . && uv run ruff format --check . && uv run pyright && uv run 
 # frontend (at repo root)
 npm run lint && npm run typecheck && npm run test -- --run
 ```
+
+## 8. Repository settings (admin)
+
+The ruleset lives in the repo so it can be reviewed and re-applied. To create it (once, by a repo admin):
+
+```bash
+gh auth login
+gh api -X POST repos/pinkpig777/Meal-Logging/rulesets --input .github/rulesets/protect-main.json
+```
+
+To update it after editing the JSON, find its ID with `gh api repos/pinkpig777/Meal-Logging/rulesets` and `PUT` to `repos/pinkpig777/Meal-Logging/rulesets/<id>` with the same `--input`.
+
+The required check names must match the `name:` of the jobs in `.github/workflows/ci.yml`. Renaming a job requires updating the ruleset, or merges will wait for a check that never runs.
