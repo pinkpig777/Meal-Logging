@@ -1,18 +1,22 @@
+import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import type { MealItem, Portion } from '@/api/types';
-import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { BottomSheet } from '@/components/BottomSheet';
 import { Field } from '@/components/Field';
-import { IconEdit, IconTrash } from '@/components/icons';
+import { MacroLine } from '@/components/MacroLine';
+import { ProvenanceBadge } from '@/components/ProvenanceBadge';
 import { ReviewCue } from '@/components/ReviewCue';
 import { cueForAttribute } from '@/components/reviewCueStatus';
-import { Sheet } from '@/components/Sheet';
-import { formatItemKcal, formatMacros, formatPortion } from '@/lib/format';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { formatItemKcal, formatPortion } from '@/lib/format';
 
+/** Provenance label per item source (§6.2). AI values have no badge. */
 const SOURCE_LABEL: Record<MealItem['source'], string | null> = {
   ai: null,
   ai_clarified: 'Updated from your answer',
-  user_edited: 'Edited by you',
+  user_edited: 'Adjusted by you',
   user_added: 'Added by you',
 };
 
@@ -25,7 +29,7 @@ export interface ItemCardProps {
   onRemove?: (item: MealItem) => void;
 }
 
-/** M2 · Clark — one item row: name, portion, kcal (+ range), macros, review cues. */
+/** M2 · Clark — one item: name, portion, kcal (+ range), macros, review cues, provenance. */
 export function ItemCard({
   item,
   disabled,
@@ -39,42 +43,47 @@ export function ItemCard({
   const sourceLabel = SOURCE_LABEL[item.source];
 
   return (
-    <Card className="space-y-2">
+    <Card className="gap-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold">
+          <h3 className="text-heading flex flex-wrap items-center gap-2">
             {item.name}
-            {item.kind === 'addon' && (
-              <span className="border-line text-muted ml-2 rounded-full border px-2 py-0.5 text-xs font-normal">
-                Add-on
-              </span>
-            )}
+            {item.kind === 'addon' && <Badge variant="secondary">Add-on</Badge>}
           </h3>
-          <p className="text-muted text-sm">
+          <p className="text-label text-muted-foreground font-normal">
             {formatPortion(item.portion)}
             {item.preparation ? ` · ${item.preparation}` : ''}
           </p>
         </div>
-        <p className="shrink-0 text-right font-semibold tabular-nums">
+        <p className="text-body shrink-0 text-right font-semibold tabular-nums">
           {formatItemKcal(item.nutrition, item.kcal_range)}
         </p>
       </div>
-      <p className="text-muted text-sm tabular-nums">{formatMacros(item.nutrition)}</p>
-      {cues.map(({ a, status }) => (
-        <ReviewCue key={a.id} attribute={a.attribute} status={status!} reason={a.reason} />
-      ))}
-      {sourceLabel && <p className="text-muted text-xs">{sourceLabel}</p>}
+      <MacroLine nutrition={item.nutrition} />
+      {cues.length > 0 && (
+        <div className="space-y-1.5 pt-1">
+          {cues.map(({ a, status }) => (
+            <ReviewCue key={a.id} attribute={a.attribute} status={status!} reason={a.reason} />
+          ))}
+        </div>
+      )}
+      {sourceLabel && <ProvenanceBadge label={sourceLabel} />}
       {(onEditPortion || onRemove) && (
-        <div className="flex gap-2 pt-1">
+        <div className="flex gap-2 pt-2">
           {onEditPortion && (
-            <Button variant="secondary" disabled={disabled} onClick={() => onEditPortion(item)}>
-              <IconEdit className="size-4" />
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={disabled}
+              onClick={() => onEditPortion(item)}
+            >
+              <Pencil aria-hidden="true" strokeWidth={1.75} />
               Edit portion
             </Button>
           )}
           {onRemove && (
-            <Button variant="danger" disabled={disabled} onClick={() => onRemove(item)}>
-              <IconTrash className="size-4" />
+            <Button variant="ghost" size="sm" disabled={disabled} onClick={() => onRemove(item)}>
+              <Trash2 aria-hidden="true" strokeWidth={1.75} />
               Remove
             </Button>
           )}
@@ -99,9 +108,14 @@ export interface PortionEditorProps {
  */
 export function PortionEditor({ item, onClose, onSave, saving }: PortionEditorProps) {
   return (
-    <Sheet open={!!item} onClose={onClose} title={item ? `Portion · ${item.name}` : 'Portion'}>
+    <BottomSheet
+      open={!!item}
+      onClose={onClose}
+      title={item ? `Portion · ${item.name}` : 'Portion'}
+      description="Nutrition is rescaled from the weight."
+    >
       {item && <PortionForm key={item.id} item={item} onSave={onSave} saving={saving} />}
-    </Sheet>
+    </BottomSheet>
   );
 }
 
@@ -123,7 +137,7 @@ function PortionForm({
 
   return (
     <form
-      className="space-y-4"
+      className="space-y-4 pb-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (valid) onSave(item.id, { qty: q, unit: item.portion.unit, grams: g });
@@ -144,7 +158,7 @@ function PortionForm({
       />
       <Field
         label="Weight (g)"
-        hint="Estimated. Nutrition is rescaled from the weight."
+        hint="Estimated."
         type="number"
         inputMode="numeric"
         min="0"

@@ -73,4 +73,4 @@ Meal-Logging/
 | `/chat` | ChatPage (TBD) | M5 |
 | `/settings` | SettingsPage (goals, analysis model, time zone, account) | M3 |
 
-The bottom navigation has four tabs: **Today**, **History**, **Log** (center), and **Suggestions**. Settings opens from the header.
+The bottom navigation has five items: **Today**, **History**, **Log** (raised, center), **Suggestions**, and **Settings**.

@@ -1,16 +1,11 @@
+import { CalendarPlus, UtensilsCrossed } from 'lucide-react';
 import { Link } from 'react-router';
-import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
-import { IconChevronRight, IconPlus } from '@/components/icons';
 import { LoadingState } from '@/components/LoadingState';
-import {
-  MEAL_TYPE_LABEL,
-  formatDayLabel,
-  formatTime,
-  formatTotalsKcal,
-  toLocalDateString,
-} from '@/lib/format';
+import { MealRow } from '@/components/MealRow';
+import { Button } from '@/components/ui/button';
+import { formatDayLabel, toLocalDateString } from '@/lib/format';
 import { useMeals } from './api';
 import { groupByDate } from './grouping';
 
@@ -33,54 +28,36 @@ export function HistoryList() {
   });
 
   return (
-    <div className="space-y-4">
-      <Link
-        to="/log?backfill=1"
-        className="min-h-touch border-line bg-surface flex items-center justify-center gap-2 rounded-xl border border-dashed font-medium"
-      >
-        <IconPlus className="size-5" />
-        Log a past meal
-      </Link>
+    <div className="space-y-6">
+      <Button asChild variant="secondary" className="w-full border-dashed">
+        <Link to="/log?backfill=1">
+          <CalendarPlus aria-hidden="true" strokeWidth={1.75} />
+          Log a past meal
+        </Link>
+      </Button>
 
-      {q.isPending && <LoadingState />}
+      {q.isPending && <LoadingState layout="list" />}
       {q.isError && <ErrorState error={q.error} onRetry={() => q.refetch()} />}
       {q.data && q.data.meals.length === 0 && (
         <EmptyState
+          icon={<UtensilsCrossed strokeWidth={1.75} />}
           title="No meals in the last 30 days"
           description="Meals you confirm will show up here."
+          action={
+            <Button asChild className="w-full">
+              <Link to="/log">Log a meal</Link>
+            </Button>
+          }
         />
       )}
       {q.data &&
         groupByDate(q.data.meals).map(([date, meals]) => (
-          <section key={date} aria-labelledby={`h-${date}`} className="space-y-2">
-            <h2 id={`h-${date}`} className="text-muted text-sm font-semibold">
+          <section key={date} aria-labelledby={`h-${date}`} className="space-y-3">
+            <h2 id={`h-${date}`} className="text-label text-muted-foreground">
               {formatDayLabel(date)}
             </h2>
             {meals.map((m) => (
-              <Link key={m.id} to={`/meals/${m.id}`} className="block">
-                <Card className="flex items-center gap-3 p-3">
-                  {m.photo_url ? (
-                    <img
-                      src={m.photo_url}
-                      alt=""
-                      className="size-12 shrink-0 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="bg-surface-2 size-12 shrink-0 rounded-lg" aria-hidden="true" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">
-                      {MEAL_TYPE_LABEL[m.meal_type]}{' '}
-                      <span className="text-muted font-normal">· {formatTime(m.eaten_at)}</span>
-                    </p>
-                    <p className="text-muted truncate text-sm">{m.item_names.join(', ')}</p>
-                  </div>
-                  <p className="shrink-0 text-sm font-medium tabular-nums">
-                    {formatTotalsKcal(m.totals)}
-                  </p>
-                  <IconChevronRight className="text-muted size-4 shrink-0" />
-                </Card>
-              </Link>
+              <MealRow key={m.id} meal={m} showThumbnail />
             ))}
           </section>
         ))}

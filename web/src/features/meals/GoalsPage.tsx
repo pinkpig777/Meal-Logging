@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import type { GoalCreate, GoalsResponse } from '@/api/types';
-import { Button } from '@/components/Button';
 import { ErrorState } from '@/components/ErrorState';
 import { Field } from '@/components/Field';
 import { LoadingState } from '@/components/LoadingState';
+import { Button } from '@/components/ui/button';
 import { formatDayLabel, toLocalDateString } from '@/lib/format';
 import { useCreateGoal, useGoals } from './api';
 
@@ -14,7 +15,7 @@ import { useCreateGoal, useGoals } from './api';
  */
 export function GoalsSection() {
   const goals = useGoals();
-  if (goals.isPending) return <LoadingState label="Loading goals…" />;
+  if (goals.isPending) return <LoadingState label="Loading goals…" layout="form" />;
   if (goals.isError) return <ErrorState error={goals.error} onRetry={() => goals.refetch()} />;
   // Remount the form when the current goal changes so it starts from the latest values.
   return <GoalsForm key={goals.data.current?.id ?? 'none'} data={goals.data} />;
@@ -30,10 +31,7 @@ function GoalsForm({ data }: { data: GoalsResponse }) {
     fat_g: cur ? String(Math.round(cur.fat_g)) : '',
     effective_from: toLocalDateString(new Date()),
   });
-  const [saved, setSaved] = useState(false);
-
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSaved(false);
     setForm((f) => ({ ...f, [k]: e.target.value }));
   };
   const nums = [form.kcal, form.protein_g, form.carbs_g, form.fat_g].map(Number);
@@ -41,7 +39,7 @@ function GoalsForm({ data }: { data: GoalsResponse }) {
 
   return (
     <form
-      className="space-y-3"
+      className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
         if (!valid) return;
@@ -52,10 +50,10 @@ function GoalsForm({ data }: { data: GoalsResponse }) {
           fat_g: nums[3],
           effective_from: form.effective_from || undefined,
         };
-        create.mutate(body, { onSuccess: () => setSaved(true) });
+        create.mutate(body, { onSuccess: () => toast.success('Goal saved') });
       }}
     >
-      <p className="text-muted text-sm">
+      <p className="text-label text-muted-foreground font-normal">
         Daily targets you choose for yourself.
         {cur && ` Current goal since ${formatDayLabel(cur.effective_from)}.`}
       </p>
@@ -68,7 +66,7 @@ function GoalsForm({ data }: { data: GoalsResponse }) {
         onChange={set('kcal')}
         required
       />
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         <Field
           label="Protein (g)"
           type="number"
@@ -104,15 +102,12 @@ function GoalsForm({ data }: { data: GoalsResponse }) {
         onChange={set('effective_from')}
         hint="Earlier days keep the goal that applied then."
       />
-      {create.isError && <ErrorState error={create.error} title="Goal not saved" />}
+      {create.isError && (
+        <ErrorState error={create.error} title="Goal not saved" className="py-2" />
+      )}
       <Button type="submit" className="w-full" disabled={!valid || create.isPending}>
         Save goal
       </Button>
-      {saved && (
-        <p role="status" className="text-muted text-center text-sm">
-          Goal saved.
-        </p>
-      )}
     </form>
   );
 }

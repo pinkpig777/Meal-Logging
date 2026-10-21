@@ -1,7 +1,12 @@
+import { Check } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
-import { cn } from './cn';
+import { cn } from '@/lib/utils';
 
-/** Selectable pill (quick replies, filters). Selection shown by check + border, not color alone. */
+/**
+ * Quick reply / filter chip (UI guidelines §5.2): pill, 40 px tall, `muted` fill.
+ * Selected = `primary-soft` fill + check icon + `aria-pressed`, so selection never
+ * relies on color alone. Wraps; never truncates an option.
+ */
 export function Chip({
   selected,
   className,
@@ -13,17 +18,19 @@ export function Chip({
       type="button"
       aria-pressed={selected}
       className={cn(
-        'min-h-touch inline-flex items-center gap-1 rounded-full border px-4 text-sm font-medium',
-        'focus-visible:outline-accent focus-visible:outline-2 focus-visible:outline-offset-2',
-        'disabled:opacity-50',
+        'text-label inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 py-2 text-left transition-colors duration-150',
+        'focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2',
+        'disabled:cursor-not-allowed disabled:not-aria-pressed:opacity-50',
         selected
-          ? 'border-accent bg-accent-soft text-text ring-accent ring-1'
-          : 'border-line bg-surface text-text hover:bg-surface-2',
+          ? 'bg-primary-soft text-foreground ring-primary ring-1 ring-inset'
+          : 'bg-muted text-foreground hover:bg-primary-soft/60 active:bg-primary-soft',
         className,
       )}
       {...rest}
     >
-      {selected && <span aria-hidden="true">✓</span>}
+      {selected && (
+        <Check className="text-primary size-4 shrink-0" strokeWidth={2.25} aria-hidden="true" />
+      )}
       {children}
     </button>
   );

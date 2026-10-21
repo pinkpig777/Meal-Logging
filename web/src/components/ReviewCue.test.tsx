@@ -4,13 +4,15 @@ import { ReviewCue } from './ReviewCue';
 import { cueForAttribute } from './reviewCueStatus';
 
 describe('ReviewCue', () => {
-  it('renders label and reason as text (not color only), with no percentage', () => {
+  it('renders icon + label + status + reason as text (not color only), with no percentage', () => {
     const { container } = render(
-      <ReviewCue attribute="portion" status="needs_review" reason="Scale is unclear" />,
+      <ReviewCue attribute="portion" status="needs_review" reason="Bowl size is hard to judge" />,
     );
     expect(screen.getByText('Portion · needs review')).toBeInTheDocument();
-    expect(screen.getByText(/scale is unclear/)).toBeInTheDocument();
-    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText(/: bowl size is hard to judge/)).toBeInTheDocument();
+    const icon = container.querySelector('svg');
+    expect(icon).toHaveAttribute('aria-hidden', 'true');
+    expect(icon).toHaveClass('lucide-circle-alert', 'text-attention');
     expect(container.textContent).not.toMatch(/%/);
   });
 

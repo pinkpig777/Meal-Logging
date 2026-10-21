@@ -4,2206 +4,2209 @@
  */
 
 export interface paths {
-    "/api/v1/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Health
-         * @description Liveness; no auth.
-         */
-        get: operations["health"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/api/v1/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/config/models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Analysis Models
-         * @description Allowed analysis models (ADR-0006).
-         */
-        get: operations["list_analysis_models"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Health
+     * @description Liveness; no auth.
+     */
+    get: operations['health'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/config/models': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/analyze": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Analyze Meal
-         * @description Photo and/or text → draft meal, with `asked` set by the clarification policy.
-         *
-         *     On an LLM failure the meal is kept with `status: failed`; its id is in `error.details.meal_id`.
-         */
-        post: operations["analyze_meal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * List Analysis Models
+     * @description Allowed analysis models (ADR-0006).
+     */
+    get: operations['list_analysis_models'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/analyze': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/items/{item_id}/reestimate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reestimate Item
-         * @description Re-estimate one item after an identity or preparation change.
-         */
-        post: operations["reestimate_item"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Analyze Meal
+     * @description Photo and/or text → draft meal, with `asked` set by the clarification policy.
+     *
+     *     On an LLM failure the meal is kept with `status: failed`; its id is in `error.details.meal_id`.
+     */
+    post: operations['analyze_meal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/items/{item_id}/reestimate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/clarify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Clarify Meal
-         * @description Answer an uncertain attribute: option (no LLM call), not_sure, or other (re-estimate).
-         */
-        post: operations["clarify_meal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Reestimate Item
+     * @description Re-estimate one item after an identity or preparation change.
+     */
+    post: operations['reestimate_item'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/clarify': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/draft": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Edit Draft Meal
-         * @description Edit a draft: meal fields, item portions and values, remove items.
-         */
-        patch: operations["edit_draft_meal"];
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Clarify Meal
+     * @description Answer an uncertain attribute: option (no LLM call), not_sure, or other (re-estimate).
+     */
+    post: operations['clarify_meal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/draft': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add Meal Item
-         * @description Add an item; estimated (text-only) if nutrition is omitted.
-         */
-        post: operations["add_meal_item"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit Draft Meal
+     * @description Edit a draft: meal fields, item portions and values, remove items.
+     */
+    patch: operations['edit_draft_meal'];
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Confirm Meal
-         * @description Confirm a draft. Confirmed meals count toward analytics and suggestions.
-         */
-        post: operations["confirm_meal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Add Meal Item
+     * @description Add an item; estimated (text-only) if nutrition is omitted.
+     */
+    post: operations['add_meal_item'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Meals
-         * @description Meals in a local-date range (default: last 7 days), newest first.
-         */
-        get: operations["list_meals"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Confirm Meal
+     * @description Confirm a draft. Confirmed meals count toward analytics and suggestions.
+     */
+    post: operations['confirm_meal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Meal */
-        get: operations["get_meal"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete Meal
-         * @description Hard delete; items and attributes cascade; the photo object is removed.
-         */
-        delete: operations["delete_meal"];
-        options?: never;
-        head?: never;
-        /**
-         * Edit Confirmed Meal
-         * @description Edit a confirmed meal in place (same body as the draft PATCH); it stays confirmed.
-         */
-        patch: operations["edit_confirmed_meal"];
-        trace?: never;
+    /**
+     * List Meals
+     * @description Meals in a local-date range (default: last 7 days), newest first.
+     */
+    get: operations['list_meals'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/meals/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/meals/{id}/photo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Delete Meal Photo
-         * @description Delete only the photo; nutrition records remain.
-         */
-        delete: operations["delete_meal_photo"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /** Get Meal */
+    get: operations['get_meal'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete Meal
+     * @description Hard delete; items and attributes cascade; the photo object is removed.
+     */
+    delete: operations['delete_meal'];
+    options?: never;
+    head?: never;
+    /**
+     * Edit Confirmed Meal
+     * @description Edit a confirmed meal in place (same body as the draft PATCH); it stays confirmed.
+     */
+    patch: operations['edit_confirmed_meal'];
+    trace?: never;
+  };
+  '/api/v1/meals/{id}/photo': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/goals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Goals */
-        get: operations["get_goals"];
-        put?: never;
-        /**
-         * Create Goal
-         * @description Set a new goal from `effective_from` (default today); replaces a same-day goal.
-         */
-        post: operations["create_goal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete Meal Photo
+     * @description Delete only the photo; nutrition records remain.
+     */
+    delete: operations['delete_meal_photo'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/goals': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Me
-         * @description Current user's profile. A valid `X-Timezone` header updates `timezone` when it changed.
-         */
-        get: operations["get_me"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Update Me */
-        patch: operations["update_me"];
-        trace?: never;
+    /** Get Goals */
+    get: operations['get_goals'];
+    put?: never;
+    /**
+     * Create Goal
+     * @description Set a new goal from `effective_from` (default today); replaces a same-day goal.
+     */
+    post: operations['create_goal'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/analytics/daily": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Daily Analytics
-         * @description One day: totals vs. goal and each meal's contribution (default: today).
-         */
-        get: operations["get_daily_analytics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Me
+     * @description Current user's profile. A valid `X-Timezone` header updates `timezone` when it changed.
+     */
+    get: operations['get_me'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Update Me */
+    patch: operations['update_me'];
+    trace?: never;
+  };
+  '/api/v1/analytics/daily': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/analytics/weekly": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Weekly Analytics
-         * @description Seven days from `start` (default: Monday of the current week); unlogged days are null.
-         */
-        get: operations["get_weekly_analytics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Daily Analytics
+     * @description One day: totals vs. goal and each meal's contribution (default: today).
+     */
+    get: operations['get_daily_analytics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/analytics/weekly': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/analytics/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get History Analytics
-         * @description Day series over a date range (at most 92 days).
-         */
-        get: operations["get_history_analytics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Weekly Analytics
+     * @description Seven days from `start` (default: Monday of the current week); unlogged days are null.
+     */
+    get: operations['get_weekly_analytics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/analytics/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/recommendations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Recommendations
-         * @description Current suggestions with evidence; `insufficient_history` below 3 logged days.
-         */
-        get: operations["get_recommendations"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get History Analytics
+     * @description Day series over a date range (at most 92 days).
+     */
+    get: operations['get_history_analytics'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/recommendations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/recommendations/feedback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Recommendation Feedback */
-        post: operations["post_recommendation_feedback"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get Recommendations
+     * @description Current suggestions with evidence; `insufficient_history` below 3 logged days.
+     */
+    get: operations['get_recommendations'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/recommendations/feedback': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/api/v1/chat": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Post Chat
-         * @description Grounded chat (scope TBD). Currently returns a placeholder reply.
-         */
-        post: operations["post_chat"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /** Post Recommendation Feedback */
+    post: operations['post_recommendation_feedback'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/chat': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    get?: never;
+    put?: never;
+    /**
+     * Post Chat
+     * @description Grounded chat (scope TBD). Currently returns a placeholder reply.
+     */
+    post: operations['post_chat'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** AddItemRequest */
-        AddItemRequest: {
-            /** Name */
-            name: string;
-            /** @description Required when nutrition is given; estimated otherwise */
-            portion?: components["schemas"]["Portion"] | null;
-            /** @description null → estimated by M1 (text-only) */
-            nutrition?: components["schemas"]["Nutrition"] | null;
-        };
-        /** AnalysisModelInfo */
-        AnalysisModelInfo: {
-            /** Id */
-            id: string;
-            /** Label */
-            label: string;
-            /** Description */
-            description: string | null;
-        };
-        /** AnalysisModelsResponse */
-        AnalysisModelsResponse: {
-            /** Default */
-            default: string;
-            /** Models */
-            models: components["schemas"]["AnalysisModelInfo"][];
-        };
-        /** AnalyzeMealRequest */
-        AnalyzeMealRequest: {
-            /**
-             * Photo Path
-             * @description Storage path under the caller's folder: {user_id}/{photo_id}.jpg
-             */
-            photo_path?: string | null;
-            /** Text Input */
-            text_input?: string | null;
-            /**
-             * Eaten At
-             * @description Defaults to now; a past value backfills
-             */
-            eaten_at?: string | null;
-            /** @description Inferred from the local time if omitted */
-            meal_type?: components["schemas"]["MealType"] | null;
-        };
-        /**
-         * AttributeKind
-         * @enum {string}
-         */
-        AttributeKind: "identity" | "portion" | "preparation" | "ingredient";
-        /** AttributeOption */
-        AttributeOption: {
-            /**
-             * Id
-             * @description Stable within the attribute, e.g. "fried"
-             */
-            id: string;
-            /** Label */
-            label: string;
-            /** @description The item's full estimate if this option is chosen */
-            nutrition: components["schemas"]["Nutrition"];
-            /** @description Set only for attribute = "portion" */
-            portion: components["schemas"]["Portion"] | null;
-        };
-        /** AttributeResolution */
-        AttributeResolution: {
-            /** Option Id */
-            option_id: string | null;
-            /** Text */
-            text: string | null;
-        };
-        /** ChatMessage */
-        ChatMessage: {
-            /**
-             * Role
-             * @enum {string}
-             */
-            role: "user" | "assistant";
-            /** Content */
-            content: string;
-        };
-        /** ChatReferences */
-        ChatReferences: {
-            /** Meal Ids */
-            meal_ids: string[];
-            /** Dates */
-            dates: string[];
-        };
-        /** ChatRequest */
-        ChatRequest: {
-            /** Messages */
-            messages: components["schemas"]["ChatMessage"][];
-        };
-        /** ChatResponse */
-        ChatResponse: {
-            message: components["schemas"]["ChatMessage"];
-            references: components["schemas"]["ChatReferences"];
-        };
-        /** ClarifyRequest */
-        ClarifyRequest: {
-            /**
-             * Attribute Id
-             * Format: uuid
-             */
-            attribute_id: string;
-            /** Answer */
-            answer: components["schemas"]["OptionAnswer"] | components["schemas"]["NotSureAnswer"] | components["schemas"]["OtherAnswer"];
-        };
-        /** DailyAnalytics */
-        DailyAnalytics: {
-            /**
-             * Date
-             * Format: date
-             */
-            date: string;
-            /** Logged */
-            logged: boolean;
-            goal: components["schemas"]["Goal"] | null;
-            totals: components["schemas"]["NutritionTotals"] | null;
-            /** Meals */
-            meals: components["schemas"]["MealContribution"][];
-        };
-        /** DayPoint */
-        DayPoint: {
-            /**
-             * Date
-             * Format: date
-             */
-            date: string;
-            /**
-             * Logged
-             * @description false → totals is null (unknown, not zero)
-             */
-            logged: boolean;
-            /** Meal Count */
-            meal_count: number;
-            totals: components["schemas"]["NutritionTotals"] | null;
-            /** @description Effective goal for that date */
-            goal: components["schemas"]["Goal"] | null;
-        };
-        /** ErrorBody */
-        ErrorBody: {
-            /**
-             * Code
-             * @description Stable UPPER_SNAKE_CASE code; clients branch on it
-             */
-            code: string;
-            /**
-             * Message
-             * @description Human-readable sentence, safe to show the user
-             */
-            message: string;
-            /** Details */
-            details: unknown;
-            /** Request Id */
-            request_id: string | null;
-        };
-        /** ErrorResponse */
-        ErrorResponse: {
-            error: components["schemas"]["ErrorBody"];
-        };
-        /** Goal */
-        Goal: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Effective From
-             * Format: date
-             */
-            effective_from: string;
-            /** Kcal */
-            kcal: number;
-            /** Protein G */
-            protein_g: number;
-            /** Carbs G */
-            carbs_g: number;
-            /** Fat G */
-            fat_g: number;
-        };
-        /** GoalCreate */
-        GoalCreate: {
-            /** Kcal */
-            kcal: number;
-            /** Protein G */
-            protein_g: number;
-            /** Carbs G */
-            carbs_g: number;
-            /** Fat G */
-            fat_g: number;
-            /**
-             * Effective From
-             * @description Defaults to today in the user's time zone
-             */
-            effective_from?: string | null;
-        };
-        /** GoalsResponse */
-        GoalsResponse: {
-            /** @description Effective goal for today; null if none yet */
-            current: components["schemas"]["Goal"] | null;
-            /**
-             * History
-             * @description All goals, newest effective_from first
-             */
-            history: components["schemas"]["Goal"][];
-        };
-        /** HealthResponse */
-        HealthResponse: {
-            /** Status */
-            status: string;
-            /** Version */
-            version: string;
-            /** App Env */
-            app_env: string;
-            /** Auth Mode */
-            auth_mode: string;
-            /** Llm Mode */
-            llm_mode: string;
-        };
-        /** HistoryAnalytics */
-        HistoryAnalytics: {
-            /** Days */
-            days: components["schemas"]["DayPoint"][];
-        };
-        /**
-         * ImageIssue
-         * @enum {string}
-         */
-        ImageIssue: "blurry" | "dark" | "partial" | "multiple_meals" | "obstructed";
-        /**
-         * ItemKind
-         * @enum {string}
-         */
-        ItemKind: "dish" | "addon";
-        /** ItemRemoveOp */
-        ItemRemoveOp: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            op: "remove";
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-        };
-        /**
-         * ItemSource
-         * @enum {string}
-         */
-        ItemSource: "ai" | "ai_clarified" | "user_edited" | "user_added";
-        /** ItemUpdateOp */
-        ItemUpdateOp: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            op: "update";
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name?: string | null;
-            /** Preparation */
-            preparation?: string | null;
-            portion?: components["schemas"]["Portion"] | null;
-            nutrition?: components["schemas"]["Nutrition"] | null;
-        };
-        /** KcalRange */
-        KcalRange: {
-            /** Low */
-            low: number;
-            /** High */
-            high: number;
-        };
-        /** Meal */
-        Meal: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            status: components["schemas"]["MealStatus"];
-            meal_type: components["schemas"]["MealType"];
-            /**
-             * Eaten At
-             * Format: date-time
-             */
-            eaten_at: string;
-            /**
-             * Local Date
-             * Format: date
-             */
-            local_date: string;
-            /** Text Input */
-            text_input: string | null;
-            /**
-             * Photo Url
-             * @description Short-lived signed URL
-             */
-            photo_url: string | null;
-            /** Model Version */
-            model_version: string | null;
-            /** Image Issues */
-            image_issues: components["schemas"]["ImageIssue"][];
-            /** Failure Reason */
-            failure_reason: string | null;
-            /** Items */
-            items: components["schemas"]["MealItem"][];
-            totals: components["schemas"]["NutritionTotals"];
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /** Confirmed At */
-            confirmed_at: string | null;
-        };
-        /** MealContribution */
-        MealContribution: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            status: components["schemas"]["MealStatus"];
-            meal_type: components["schemas"]["MealType"];
-            /**
-             * Eaten At
-             * Format: date-time
-             */
-            eaten_at: string;
-            /**
-             * Local Date
-             * Format: date
-             */
-            local_date: string;
-            /** Photo Url */
-            photo_url: string | null;
-            /** Item Names */
-            item_names: string[];
-            totals: components["schemas"]["NutritionTotals"];
-            /** @description Fraction of the day's total for each metric, 0–1 */
-            share: components["schemas"]["Nutrition"];
-        };
-        /**
-         * MealEditRequest
-         * @description Body of `PATCH /meals/{id}/draft` and `PATCH /meals/{id}`.
-         */
-        MealEditRequest: {
-            meal_type?: components["schemas"]["MealType"] | null;
-            /** Eaten At */
-            eaten_at?: string | null;
-            /** Items */
-            items?: (components["schemas"]["ItemUpdateOp"] | components["schemas"]["ItemRemoveOp"])[];
-        };
-        /** MealItem */
-        MealItem: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Position */
-            position: number;
-            kind: components["schemas"]["ItemKind"];
-            /** Name */
-            name: string;
-            /** Preparation */
-            preparation: string | null;
-            portion: components["schemas"]["Portion"];
-            nutrition: components["schemas"]["Nutrition"];
-            /** @description null when unresolved options do not spread meaningfully */
-            kcal_range: components["schemas"]["KcalRange"] | null;
-            source: components["schemas"]["ItemSource"];
-            /** Uncertain Attributes */
-            uncertain_attributes: components["schemas"]["UncertainAttribute"][];
-            /**
-             * Ai Original
-             * @description Immutable snapshot of the AI's first estimate
-             */
-            ai_original: {
-                [key: string]: unknown;
-            } | null;
-        };
-        /** MealListResponse */
-        MealListResponse: {
-            /** Meals */
-            meals: components["schemas"]["MealSummary"][];
-        };
-        /**
-         * MealStatus
-         * @enum {string}
-         */
-        MealStatus: "analyzing" | "draft" | "confirmed" | "failed";
-        /** MealSummary */
-        MealSummary: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            status: components["schemas"]["MealStatus"];
-            meal_type: components["schemas"]["MealType"];
-            /**
-             * Eaten At
-             * Format: date-time
-             */
-            eaten_at: string;
-            /**
-             * Local Date
-             * Format: date
-             */
-            local_date: string;
-            /** Photo Url */
-            photo_url: string | null;
-            /** Item Names */
-            item_names: string[];
-            totals: components["schemas"]["NutritionTotals"];
-        };
-        /**
-         * MealType
-         * @enum {string}
-         */
-        MealType: "breakfast" | "lunch" | "dinner" | "snack";
-        /** NotSureAnswer */
-        NotSureAnswer: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "not_sure";
-        };
-        /** Nutrition */
-        Nutrition: {
-            /** Kcal */
-            kcal: number;
-            /** Protein G */
-            protein_g: number;
-            /** Carbs G */
-            carbs_g: number;
-            /** Fat G */
-            fat_g: number;
-        };
-        /** NutritionTotals */
-        NutritionTotals: {
-            /** Kcal */
-            kcal: number;
-            /** Protein G */
-            protein_g: number;
-            /** Carbs G */
-            carbs_g: number;
-            /** Fat G */
-            fat_g: number;
-            /** Kcal Low */
-            kcal_low: number;
-            /** Kcal High */
-            kcal_high: number;
-        };
-        /** OptionAnswer */
-        OptionAnswer: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "option";
-            /** Option Id */
-            option_id: string;
-        };
-        /** OtherAnswer */
-        OtherAnswer: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            kind: "other";
-            /** Text */
-            text: string;
-        };
-        /** Portion */
-        Portion: {
-            /**
-             * Qty
-             * @description e.g. 1.5
-             */
-            qty: number;
-            /**
-             * Unit
-             * @description Familiar unit: "cup", "piece", "slice", "tbsp", "g"
-             */
-            unit: string;
-            /**
-             * Grams
-             * @description Estimated weight in grams
-             */
-            grams: number;
-        };
-        /** Profile */
-        Profile: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Email */
-            email: string;
-            /** Display Name */
-            display_name: string | null;
-            /** Avatar Url */
-            avatar_url: string | null;
-            /** Timezone */
-            timezone: string;
-            /** Dietary Restrictions */
-            dietary_restrictions: string[];
-            /**
-             * Analysis Model
-             * @description null = server default
-             */
-            analysis_model: string | null;
-        };
-        /** ProfileUpdate */
-        ProfileUpdate: {
-            /** Display Name */
-            display_name?: string | null;
-            /**
-             * Timezone
-             * @description IANA name, e.g. America/Chicago
-             */
-            timezone?: string | null;
-            /** Dietary Restrictions */
-            dietary_restrictions?: string[] | null;
-            /**
-             * Analysis Model
-             * @description null resets to the server default
-             */
-            analysis_model?: string | null;
-        };
-        /** RecommendationsResponse */
-        RecommendationsResponse: {
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "ok" | "insufficient_history";
-            /** Logged Day Count */
-            logged_day_count: number;
-            /** Required Day Count */
-            required_day_count: number;
-            /** Suggestions */
-            suggestions: components["schemas"]["Suggestion"][];
-        };
-        /** ReestimateItemRequest */
-        ReestimateItemRequest: {
-            /** Name */
-            name?: string | null;
-            /** Preparation */
-            preparation?: string | null;
-            /** Note */
-            note?: string | null;
-        };
-        /**
-         * ResolutionStatus
-         * @enum {string}
-         */
-        ResolutionStatus: "unresolved" | "answered" | "not_sure";
-        /** Suggestion */
-        Suggestion: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            pattern: components["schemas"]["SuggestionPattern"];
-            /** Title */
-            title: string;
-            /** Ideas */
-            ideas: components["schemas"]["SuggestionIdea"][];
-            evidence: components["schemas"]["SuggestionEvidence"];
-            /** Caveats */
-            caveats: string[];
-        };
-        /** SuggestionEvidence */
-        SuggestionEvidence: {
-            /** Dates */
-            dates: string[];
-            /** Meal Ids */
-            meal_ids: string[];
-            /** Observations */
-            observations: string[];
-        };
-        /** SuggestionFeedbackRequest */
-        SuggestionFeedbackRequest: {
-            /**
-             * Suggestion
-             * @description Snapshot of the suggestion shown
-             */
-            suggestion: {
-                [key: string]: unknown;
-            };
-            response: components["schemas"]["SuggestionResponse"];
-        };
-        /** SuggestionIdea */
-        SuggestionIdea: {
-            /** Name */
-            name: string;
-            /** Description */
-            description: string;
-            estimated_nutrition: components["schemas"]["Nutrition"];
-        };
-        /** SuggestionPattern */
-        SuggestionPattern: {
-            /**
-             * Metric
-             * @description e.g. "protein_g"
-             */
-            metric: string;
-            /** Summary */
-            summary: string;
-        };
-        /**
-         * SuggestionResponse
-         * @enum {string}
-         */
-        SuggestionResponse: "useful" | "not_for_me" | "already_do";
-        /** UncertainAttribute */
-        UncertainAttribute: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            attribute: components["schemas"]["AttributeKind"];
-            /** Reason */
-            reason: string;
-            /** Question */
-            question: string;
-            /** Options */
-            options: components["schemas"]["AttributeOption"][];
-            /** Current Option Id */
-            current_option_id: string;
-            /**
-             * Impact Kcal
-             * @description max - min kcal across options
-             */
-            impact_kcal: number;
-            /**
-             * Asked
-             * @description Selected by the clarification policy
-             */
-            asked: boolean;
-            status: components["schemas"]["ResolutionStatus"];
-            resolution: components["schemas"]["AttributeResolution"] | null;
-        };
-        /** WeeklyAnalytics */
-        WeeklyAnalytics: {
-            /**
-             * Start
-             * Format: date
-             */
-            start: string;
-            /**
-             * End
-             * Format: date
-             */
-            end: string;
-            /**
-             * Days
-             * @description Always 7 entries, one per date
-             */
-            days: components["schemas"]["DayPoint"][];
-            /** Logged Day Count */
-            logged_day_count: number;
-            /** @description Averages over logged days only */
-            averages: components["schemas"]["Nutrition"] | null;
-        };
+  schemas: {
+    /** AddItemRequest */
+    AddItemRequest: {
+      /** Name */
+      name: string;
+      /** @description Required when nutrition is given; estimated otherwise */
+      portion?: components['schemas']['Portion'] | null;
+      /** @description null → estimated by M1 (text-only) */
+      nutrition?: components['schemas']['Nutrition'] | null;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    /** AnalysisModelInfo */
+    AnalysisModelInfo: {
+      /** Id */
+      id: string;
+      /** Label */
+      label: string;
+      /** Description */
+      description: string | null;
+    };
+    /** AnalysisModelsResponse */
+    AnalysisModelsResponse: {
+      /** Default */
+      default: string;
+      /** Models */
+      models: components['schemas']['AnalysisModelInfo'][];
+    };
+    /** AnalyzeMealRequest */
+    AnalyzeMealRequest: {
+      /**
+       * Photo Path
+       * @description Storage path under the caller's folder: {user_id}/{photo_id}.jpg
+       */
+      photo_path?: string | null;
+      /** Text Input */
+      text_input?: string | null;
+      /**
+       * Eaten At
+       * @description Defaults to now; a past value backfills
+       */
+      eaten_at?: string | null;
+      /** @description Inferred from the local time if omitted */
+      meal_type?: components['schemas']['MealType'] | null;
+    };
+    /**
+     * AttributeKind
+     * @enum {string}
+     */
+    AttributeKind: 'identity' | 'portion' | 'preparation' | 'ingredient';
+    /** AttributeOption */
+    AttributeOption: {
+      /**
+       * Id
+       * @description Stable within the attribute, e.g. "fried"
+       */
+      id: string;
+      /** Label */
+      label: string;
+      /** @description The item's full estimate if this option is chosen */
+      nutrition: components['schemas']['Nutrition'];
+      /** @description Set only for attribute = "portion" */
+      portion: components['schemas']['Portion'] | null;
+    };
+    /** AttributeResolution */
+    AttributeResolution: {
+      /** Option Id */
+      option_id: string | null;
+      /** Text */
+      text: string | null;
+    };
+    /** ChatMessage */
+    ChatMessage: {
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: 'user' | 'assistant';
+      /** Content */
+      content: string;
+    };
+    /** ChatReferences */
+    ChatReferences: {
+      /** Meal Ids */
+      meal_ids: string[];
+      /** Dates */
+      dates: string[];
+    };
+    /** ChatRequest */
+    ChatRequest: {
+      /** Messages */
+      messages: components['schemas']['ChatMessage'][];
+    };
+    /** ChatResponse */
+    ChatResponse: {
+      message: components['schemas']['ChatMessage'];
+      references: components['schemas']['ChatReferences'];
+    };
+    /** ClarifyRequest */
+    ClarifyRequest: {
+      /**
+       * Attribute Id
+       * Format: uuid
+       */
+      attribute_id: string;
+      /** Answer */
+      answer:
+        | components['schemas']['OptionAnswer']
+        | components['schemas']['NotSureAnswer']
+        | components['schemas']['OtherAnswer'];
+    };
+    /** DailyAnalytics */
+    DailyAnalytics: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /** Logged */
+      logged: boolean;
+      goal: components['schemas']['Goal'] | null;
+      totals: components['schemas']['NutritionTotals'] | null;
+      /** Meals */
+      meals: components['schemas']['MealContribution'][];
+    };
+    /** DayPoint */
+    DayPoint: {
+      /**
+       * Date
+       * Format: date
+       */
+      date: string;
+      /**
+       * Logged
+       * @description false → totals is null (unknown, not zero)
+       */
+      logged: boolean;
+      /** Meal Count */
+      meal_count: number;
+      totals: components['schemas']['NutritionTotals'] | null;
+      /** @description Effective goal for that date */
+      goal: components['schemas']['Goal'] | null;
+    };
+    /** ErrorBody */
+    ErrorBody: {
+      /**
+       * Code
+       * @description Stable UPPER_SNAKE_CASE code; clients branch on it
+       */
+      code: string;
+      /**
+       * Message
+       * @description Human-readable sentence, safe to show the user
+       */
+      message: string;
+      /** Details */
+      details: unknown;
+      /** Request Id */
+      request_id: string | null;
+    };
+    /** ErrorResponse */
+    ErrorResponse: {
+      error: components['schemas']['ErrorBody'];
+    };
+    /** Goal */
+    Goal: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /**
+       * Effective From
+       * Format: date
+       */
+      effective_from: string;
+      /** Kcal */
+      kcal: number;
+      /** Protein G */
+      protein_g: number;
+      /** Carbs G */
+      carbs_g: number;
+      /** Fat G */
+      fat_g: number;
+    };
+    /** GoalCreate */
+    GoalCreate: {
+      /** Kcal */
+      kcal: number;
+      /** Protein G */
+      protein_g: number;
+      /** Carbs G */
+      carbs_g: number;
+      /** Fat G */
+      fat_g: number;
+      /**
+       * Effective From
+       * @description Defaults to today in the user's time zone
+       */
+      effective_from?: string | null;
+    };
+    /** GoalsResponse */
+    GoalsResponse: {
+      /** @description Effective goal for today; null if none yet */
+      current: components['schemas']['Goal'] | null;
+      /**
+       * History
+       * @description All goals, newest effective_from first
+       */
+      history: components['schemas']['Goal'][];
+    };
+    /** HealthResponse */
+    HealthResponse: {
+      /** Status */
+      status: string;
+      /** Version */
+      version: string;
+      /** App Env */
+      app_env: string;
+      /** Auth Mode */
+      auth_mode: string;
+      /** Llm Mode */
+      llm_mode: string;
+    };
+    /** HistoryAnalytics */
+    HistoryAnalytics: {
+      /** Days */
+      days: components['schemas']['DayPoint'][];
+    };
+    /**
+     * ImageIssue
+     * @enum {string}
+     */
+    ImageIssue: 'blurry' | 'dark' | 'partial' | 'multiple_meals' | 'obstructed';
+    /**
+     * ItemKind
+     * @enum {string}
+     */
+    ItemKind: 'dish' | 'addon';
+    /** ItemRemoveOp */
+    ItemRemoveOp: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      op: 'remove';
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+    };
+    /**
+     * ItemSource
+     * @enum {string}
+     */
+    ItemSource: 'ai' | 'ai_clarified' | 'user_edited' | 'user_added';
+    /** ItemUpdateOp */
+    ItemUpdateOp: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      op: 'update';
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Name */
+      name?: string | null;
+      /** Preparation */
+      preparation?: string | null;
+      portion?: components['schemas']['Portion'] | null;
+      nutrition?: components['schemas']['Nutrition'] | null;
+    };
+    /** KcalRange */
+    KcalRange: {
+      /** Low */
+      low: number;
+      /** High */
+      high: number;
+    };
+    /** Meal */
+    Meal: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      status: components['schemas']['MealStatus'];
+      meal_type: components['schemas']['MealType'];
+      /**
+       * Eaten At
+       * Format: date-time
+       */
+      eaten_at: string;
+      /**
+       * Local Date
+       * Format: date
+       */
+      local_date: string;
+      /** Text Input */
+      text_input: string | null;
+      /**
+       * Photo Url
+       * @description Short-lived signed URL
+       */
+      photo_url: string | null;
+      /** Model Version */
+      model_version: string | null;
+      /** Image Issues */
+      image_issues: components['schemas']['ImageIssue'][];
+      /** Failure Reason */
+      failure_reason: string | null;
+      /** Items */
+      items: components['schemas']['MealItem'][];
+      totals: components['schemas']['NutritionTotals'];
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string;
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string;
+      /** Confirmed At */
+      confirmed_at: string | null;
+    };
+    /** MealContribution */
+    MealContribution: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      status: components['schemas']['MealStatus'];
+      meal_type: components['schemas']['MealType'];
+      /**
+       * Eaten At
+       * Format: date-time
+       */
+      eaten_at: string;
+      /**
+       * Local Date
+       * Format: date
+       */
+      local_date: string;
+      /** Photo Url */
+      photo_url: string | null;
+      /** Item Names */
+      item_names: string[];
+      totals: components['schemas']['NutritionTotals'];
+      /** @description Fraction of the day's total for each metric, 0–1 */
+      share: components['schemas']['Nutrition'];
+    };
+    /**
+     * MealEditRequest
+     * @description Body of `PATCH /meals/{id}/draft` and `PATCH /meals/{id}`.
+     */
+    MealEditRequest: {
+      meal_type?: components['schemas']['MealType'] | null;
+      /** Eaten At */
+      eaten_at?: string | null;
+      /** Items */
+      items?: (components['schemas']['ItemUpdateOp'] | components['schemas']['ItemRemoveOp'])[];
+    };
+    /** MealItem */
+    MealItem: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Position */
+      position: number;
+      kind: components['schemas']['ItemKind'];
+      /** Name */
+      name: string;
+      /** Preparation */
+      preparation: string | null;
+      portion: components['schemas']['Portion'];
+      nutrition: components['schemas']['Nutrition'];
+      /** @description null when unresolved options do not spread meaningfully */
+      kcal_range: components['schemas']['KcalRange'] | null;
+      source: components['schemas']['ItemSource'];
+      /** Uncertain Attributes */
+      uncertain_attributes: components['schemas']['UncertainAttribute'][];
+      /**
+       * Ai Original
+       * @description Immutable snapshot of the AI's first estimate
+       */
+      ai_original: {
+        [key: string]: unknown;
+      } | null;
+    };
+    /** MealListResponse */
+    MealListResponse: {
+      /** Meals */
+      meals: components['schemas']['MealSummary'][];
+    };
+    /**
+     * MealStatus
+     * @enum {string}
+     */
+    MealStatus: 'analyzing' | 'draft' | 'confirmed' | 'failed';
+    /** MealSummary */
+    MealSummary: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      status: components['schemas']['MealStatus'];
+      meal_type: components['schemas']['MealType'];
+      /**
+       * Eaten At
+       * Format: date-time
+       */
+      eaten_at: string;
+      /**
+       * Local Date
+       * Format: date
+       */
+      local_date: string;
+      /** Photo Url */
+      photo_url: string | null;
+      /** Item Names */
+      item_names: string[];
+      totals: components['schemas']['NutritionTotals'];
+    };
+    /**
+     * MealType
+     * @enum {string}
+     */
+    MealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    /** NotSureAnswer */
+    NotSureAnswer: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'not_sure';
+    };
+    /** Nutrition */
+    Nutrition: {
+      /** Kcal */
+      kcal: number;
+      /** Protein G */
+      protein_g: number;
+      /** Carbs G */
+      carbs_g: number;
+      /** Fat G */
+      fat_g: number;
+    };
+    /** NutritionTotals */
+    NutritionTotals: {
+      /** Kcal */
+      kcal: number;
+      /** Protein G */
+      protein_g: number;
+      /** Carbs G */
+      carbs_g: number;
+      /** Fat G */
+      fat_g: number;
+      /** Kcal Low */
+      kcal_low: number;
+      /** Kcal High */
+      kcal_high: number;
+    };
+    /** OptionAnswer */
+    OptionAnswer: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'option';
+      /** Option Id */
+      option_id: string;
+    };
+    /** OtherAnswer */
+    OtherAnswer: {
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      kind: 'other';
+      /** Text */
+      text: string;
+    };
+    /** Portion */
+    Portion: {
+      /**
+       * Qty
+       * @description e.g. 1.5
+       */
+      qty: number;
+      /**
+       * Unit
+       * @description Familiar unit: "cup", "piece", "slice", "tbsp", "g"
+       */
+      unit: string;
+      /**
+       * Grams
+       * @description Estimated weight in grams
+       */
+      grams: number;
+    };
+    /** Profile */
+    Profile: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      /** Email */
+      email: string;
+      /** Display Name */
+      display_name: string | null;
+      /** Avatar Url */
+      avatar_url: string | null;
+      /** Timezone */
+      timezone: string;
+      /** Dietary Restrictions */
+      dietary_restrictions: string[];
+      /**
+       * Analysis Model
+       * @description null = server default
+       */
+      analysis_model: string | null;
+    };
+    /** ProfileUpdate */
+    ProfileUpdate: {
+      /** Display Name */
+      display_name?: string | null;
+      /**
+       * Timezone
+       * @description IANA name, e.g. America/Chicago
+       */
+      timezone?: string | null;
+      /** Dietary Restrictions */
+      dietary_restrictions?: string[] | null;
+      /**
+       * Analysis Model
+       * @description null resets to the server default
+       */
+      analysis_model?: string | null;
+    };
+    /** RecommendationsResponse */
+    RecommendationsResponse: {
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: 'ok' | 'insufficient_history';
+      /** Logged Day Count */
+      logged_day_count: number;
+      /** Required Day Count */
+      required_day_count: number;
+      /** Suggestions */
+      suggestions: components['schemas']['Suggestion'][];
+    };
+    /** ReestimateItemRequest */
+    ReestimateItemRequest: {
+      /** Name */
+      name?: string | null;
+      /** Preparation */
+      preparation?: string | null;
+      /** Note */
+      note?: string | null;
+    };
+    /**
+     * ResolutionStatus
+     * @enum {string}
+     */
+    ResolutionStatus: 'unresolved' | 'answered' | 'not_sure';
+    /** Suggestion */
+    Suggestion: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      pattern: components['schemas']['SuggestionPattern'];
+      /** Title */
+      title: string;
+      /** Ideas */
+      ideas: components['schemas']['SuggestionIdea'][];
+      evidence: components['schemas']['SuggestionEvidence'];
+      /** Caveats */
+      caveats: string[];
+    };
+    /** SuggestionEvidence */
+    SuggestionEvidence: {
+      /** Dates */
+      dates: string[];
+      /** Meal Ids */
+      meal_ids: string[];
+      /** Observations */
+      observations: string[];
+    };
+    /** SuggestionFeedbackRequest */
+    SuggestionFeedbackRequest: {
+      /**
+       * Suggestion
+       * @description Snapshot of the suggestion shown
+       */
+      suggestion: {
+        [key: string]: unknown;
+      };
+      response: components['schemas']['SuggestionResponse'];
+    };
+    /** SuggestionIdea */
+    SuggestionIdea: {
+      /** Name */
+      name: string;
+      /** Description */
+      description: string;
+      estimated_nutrition: components['schemas']['Nutrition'];
+    };
+    /** SuggestionPattern */
+    SuggestionPattern: {
+      /**
+       * Metric
+       * @description e.g. "protein_g"
+       */
+      metric: string;
+      /** Summary */
+      summary: string;
+    };
+    /**
+     * SuggestionResponse
+     * @enum {string}
+     */
+    SuggestionResponse: 'useful' | 'not_for_me' | 'already_do';
+    /** UncertainAttribute */
+    UncertainAttribute: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string;
+      attribute: components['schemas']['AttributeKind'];
+      /** Reason */
+      reason: string;
+      /** Question */
+      question: string;
+      /** Options */
+      options: components['schemas']['AttributeOption'][];
+      /** Current Option Id */
+      current_option_id: string;
+      /**
+       * Impact Kcal
+       * @description max - min kcal across options
+       */
+      impact_kcal: number;
+      /**
+       * Asked
+       * @description Selected by the clarification policy
+       */
+      asked: boolean;
+      status: components['schemas']['ResolutionStatus'];
+      resolution: components['schemas']['AttributeResolution'] | null;
+    };
+    /** WeeklyAnalytics */
+    WeeklyAnalytics: {
+      /**
+       * Start
+       * Format: date
+       */
+      start: string;
+      /**
+       * End
+       * Format: date
+       */
+      end: string;
+      /**
+       * Days
+       * @description Always 7 entries, one per date
+       */
+      days: components['schemas']['DayPoint'][];
+      /** Logged Day Count */
+      logged_day_count: number;
+      /** @description Averages over logged days only */
+      averages: components['schemas']['Nutrition'] | null;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HealthResponse"];
-                };
-            };
-        };
+  health: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    list_analysis_models: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AnalysisModelsResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['HealthResponse'];
         };
+      };
     };
-    analyze_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AnalyzeMealRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  list_analysis_models: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    reestimate_item: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-                item_id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReestimateItemRequest"];
-            };
+        content: {
+          'application/json': components['schemas']['AnalysisModelsResponse'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    clarify_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ClarifyRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  analyze_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    edit_draft_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MealEditRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AnalyzeMealRequest'];
+      };
     };
-    add_meal_item: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddItemRequest"];
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    confirm_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  reestimate_item: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+        item_id: string;
+      };
+      cookie?: never;
     };
-    list_meals: {
-        parameters: {
-            query?: {
-                from?: string | null;
-                to?: string | null;
-                status?: components["schemas"]["MealStatus"];
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MealListResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReestimateItemRequest'];
+      };
     };
-    get_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    delete_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  clarify_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    edit_confirmed_meal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MealEditRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Meal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClarifyRequest'];
+      };
     };
-    delete_meal_photo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    get_goals: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GoalsResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  edit_draft_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    create_goal: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GoalCreate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Goal"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MealEditRequest'];
+      };
     };
-    get_me: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Browser IANA time zone */
-                "x-timezone"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Profile"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    update_me: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProfileUpdate"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Profile"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  add_meal_item: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    get_daily_analytics: {
-        parameters: {
-            query?: {
-                date?: string | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DailyAnalytics"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AddItemRequest'];
+      };
     };
-    get_weekly_analytics: {
-        parameters: {
-            query?: {
-                start?: string | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WeeklyAnalytics"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    get_history_analytics: {
-        parameters: {
-            query: {
-                from: string;
-                to: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HistoryAnalytics"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  confirm_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
     };
-    get_recommendations: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecommendationsResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+        content: {
+          'application/json': components['schemas']['Meal'];
         };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
-    post_recommendation_feedback: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SuggestionFeedbackRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
+  };
+  list_meals: {
+    parameters: {
+      query?: {
+        from?: string | null;
+        to?: string | null;
+        status?: components['schemas']['MealStatus'];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    post_chat: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChatRequest"];
-            };
+        content: {
+          'application/json': components['schemas']['MealListResponse'];
         };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChatResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Client error (see error.code) */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            /** @description Server or upstream LLM error */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
     };
+  };
+  get_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Meal'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  delete_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  edit_confirmed_meal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MealEditRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Meal'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  delete_meal_photo: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_goals: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GoalsResponse'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  create_goal: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GoalCreate'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Goal'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_me: {
+    parameters: {
+      query?: never;
+      header?: {
+        /** @description Browser IANA time zone */
+        'x-timezone'?: string | null;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Profile'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  update_me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProfileUpdate'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Profile'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_daily_analytics: {
+    parameters: {
+      query?: {
+        date?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DailyAnalytics'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_weekly_analytics: {
+    parameters: {
+      query?: {
+        start?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WeeklyAnalytics'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_history_analytics: {
+    parameters: {
+      query: {
+        from: string;
+        to: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HistoryAnalytics'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  get_recommendations: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RecommendationsResponse'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  post_recommendation_feedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SuggestionFeedbackRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
+  post_chat: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChatRequest'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChatResponse'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Client error (see error.code) */
+      '4XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+      /** @description Server or upstream LLM error */
+      '5XX': {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ErrorResponse'];
+        };
+      };
+    };
+  };
 }

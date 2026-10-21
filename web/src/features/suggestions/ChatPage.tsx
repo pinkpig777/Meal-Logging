@@ -1,9 +1,13 @@
+import { MessageCircle, SendHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import type { ChatMessage } from '@/api/types';
-import { Button } from '@/components/Button';
+import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
-import { inputClass } from '@/components/Field';
 import { Spinner } from '@/components/LoadingState';
+import { StickyActionBar } from '@/components/StickyActionBar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { useChat } from './api';
 
 /**
@@ -30,46 +34,62 @@ export function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-muted text-sm">
-        Preview. Answers use only your confirmed meals and goals.
-      </p>
-      <ul className="space-y-2" aria-live="polite">
-        {messages.map((m, i) => (
-          <li
-            key={i}
-            className={
-              m.role === 'user'
-                ? 'bg-accent text-accent-fg ml-8 rounded-2xl px-3 py-2'
-                : 'bg-surface mr-8 rounded-2xl px-3 py-2'
-            }
-          >
-            <span className="sr-only">{m.role === 'user' ? 'You: ' : 'Assistant: '}</span>
-            {m.content}
-          </li>
-        ))}
-        {chat.isPending && (
-          <li className="text-muted mr-8 flex items-center gap-2">
-            <Spinner className="size-4" /> Thinking…
-          </li>
+    <div className="flex min-h-[60dvh] flex-col">
+      <div className="flex-1 space-y-4">
+        <p className="text-label text-muted-foreground font-normal">
+          Preview. Answers use only your confirmed meals and goals.
+        </p>
+        {messages.length === 0 && !chat.isPending && (
+          <EmptyState
+            icon={<MessageCircle strokeWidth={1.75} />}
+            title="Ask about your meals"
+            description="For example: how much protein did I average this week?"
+          />
         )}
-      </ul>
-      {chat.isError && <ErrorState error={chat.error} title="Message not sent" />}
-      <form onSubmit={send} className="flex gap-2">
-        <label htmlFor="chat-input" className="sr-only">
-          Message
-        </label>
-        <input
-          id="chat-input"
-          className={inputClass}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Would a burrito fit my goals tonight?"
-        />
-        <Button type="submit" disabled={!draft.trim() || chat.isPending}>
-          Send
-        </Button>
-      </form>
+        <ul className="space-y-3" aria-live="polite">
+          {messages.map((m, i) => (
+            <li
+              key={i}
+              className={cn(
+                'rounded-card max-w-[85%] px-4 py-3',
+                m.role === 'user'
+                  ? 'bg-primary-soft text-foreground rounded-br-small ml-auto'
+                  : 'bg-card border-card-edge shadow-card rounded-bl-small mr-auto border',
+              )}
+            >
+              <span className="sr-only">{m.role === 'user' ? 'You: ' : 'Assistant: '}</span>
+              {m.content}
+            </li>
+          ))}
+          {chat.isPending && (
+            <li className="text-muted-foreground flex items-center gap-2">
+              <Spinner className="size-4" /> Thinking…
+            </li>
+          )}
+        </ul>
+        {chat.isError && <ErrorState error={chat.error} title="Message not sent" />}
+      </div>
+      <StickyActionBar>
+        <form onSubmit={send} className="flex gap-2">
+          <label htmlFor="chat-input" className="sr-only">
+            Message
+          </label>
+          <Input
+            id="chat-input"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Would a burrito fit my goals tonight?"
+          />
+          <Button
+            type="submit"
+            size="icon-lg"
+            disabled={!draft.trim() || chat.isPending}
+            aria-label="Send"
+          >
+            <SendHorizontal aria-hidden="true" strokeWidth={1.75} />
+          </Button>
+        </form>
+      </StickyActionBar>
     </div>
   );
 }
