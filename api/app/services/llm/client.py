@@ -37,7 +37,7 @@ from app.services.llm.schemas import AnalysisResult, EstimateItemResult, LLMItem
 logger = logging.getLogger(__name__)
 
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
-ANALYZE_PROMPT_VERSION = "analyze_meal.v1"
+ANALYZE_PROMPT_VERSION = "analyze_meal.v2"
 ESTIMATE_PROMPT_VERSION = "estimate_item.v1"
 
 

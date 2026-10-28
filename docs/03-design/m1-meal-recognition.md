@@ -102,8 +102,10 @@ Prompts live in `api/app/services/llm/prompts/` as versioned files (`analyze_mea
 
 **System prompt rules** (summary; the file is authoritative):
 
-1. Split the meal into items **at the level a person would name them** ("chicken burrito", not tortilla + rice + beans).
-2. List **calorie-dense sauces, dressings, oils, and toppings** as separate `addon` items when they are visible or very likely.
+1. Split the meal into items **at the level a person would name them** ("chicken burrito", not tortilla + rice + beans). Rice, beans, grains, noodles, meat, and vegetables stay inside their dish; never count a food twice.
+2. List **calorie-dense sauces, dressings, oils, and toppings** as separate `addon` items when they are visible, named in the user's text, or very likely, even when they sit on a bowl.
+2a. **Look for hidden bases** (rice under donburi, curry, poke; noodles under sauce). Name the dish by cuisine and serving style, assume the typical base, and ask about it with an `ingredient` attribute. *(Added in v2.)*
+2b. Name the **cooking style** correctly (simmered in sweet soy sauce ≠ stir-fried), because it changes fat and sugar. *(Added in v2.)*
 3. Use **familiar units** (cup, piece, slice, tbsp, bowl) and estimate grams.
 4. Report an uncertain attribute only when the answer would **change the estimate meaningfully**. At most 3 per item; ignore garnishes.
 5. Each attribute has 2–4 mutually exclusive options. One option must match the current estimate (`current_option_id`).
@@ -111,7 +113,7 @@ Prompts live in `api/app/services/llm/prompts/` as versioned files (`analyze_mea
 7. For portion attributes, options are nearby familiar amounts (e.g. ½ cup / 1 cup / 1½ cups / 2 cups).
 8. `reason` explains *why* in plain language ("scale is unclear", "sauce is not visible"). Never state a confidence percentage.
 9. If the image does not show food, set `is_food = false` and return no items.
-10. Use the user's text as strong evidence; it overrides visual guesses.
+10. Use the user's text as strong evidence; it overrides visual guesses. Never ask about something the text already states.
 
 **User message:** the image (downloaded from Storage by the API and sent inline as base64, because a local Supabase URL is not reachable by OpenAI; `detail` set for adequate resolution), the optional text, the local time and meal type hint, and the user's dietary restrictions (only as context, never to change the recognized food).
 
@@ -189,3 +191,25 @@ Client-side resize: longest edge 1024 px, JPEG quality 0.8, EXIF orientation app
 | M1-Q1 | Which models go in the allowlist? (Decide after the fixture comparison.) |
 | M1-Q2 | Should text-only input with an obvious single item skip uncertain attributes entirely? |
 | M1-Q3 | Should a second photo angle be supported in the MVP? |
+
+## 7. Prompt history
+
+| Version | Date | Change | Evidence |
+|---|---|---|---|
+| `analyze_meal.v1` | 2026-10-21 | Initial prompt | — |
+| `analyze_meal.v2` | 2026-10-28 | General **hidden-calories** rule (underneath, inside, mixed in, absorbed in cooking, in drinks): include the typical amount and ask only when it is typical for the dish and uncertain; cuisine-aware naming and cooking method; add-ons always separate (with example), rice/beans/grains never add-ons, no double counting; never ask what the text states; sweetened drinks ask sugar level and toppings before size; `partial` only when food is cut off | First live tests (below) |
+
+**Spot check of v2 (one run per case, 2026-10-28; not a formal evaluation):**
+
+| Case | Expected | gpt-5.4-mini | gpt-4.1-mini |
+|---|---|---|---|
+| Photo: sukiyaki beef bowl, rice hidden | Ask about rice | ✅ asks; assumes 1 cup | ✅ asks |
+| "chicken quesadilla" | Count cheese inside | ✅ included | ✅ included |
+| "caesar salad" | Handle dressing | ✅ asks dressing amount | ✅ asks dressing amount |
+| "large brown sugar boba milk tea" | Ask sugar level / pearls, not size | ❌ asks size | ✅ asks sugar level and pearls |
+| "takeout chicken fried rice" | Account for oil | ✅ included | ✅ included |
+| Burrito bowl, toppings named | Split add-ons; no redundant question | ✅ | ✅ |
+| Salmon with rice on the side | No hidden-base question | ✅ none | ✅ none |
+| Black coffee, banana | No questions | ✅ none | ✅ none |
+
+Known issues: gpt-5.4-mini still asks drink size; whether a hidden base is included by default varies between runs. Validation now allows ±20 kcal on the energy check, because the 4/4/9 factors overstate high-fiber vegetables and caused needless retries. A repeated-run fixture evaluation (testing strategy §4) is needed before finalizing the model allowlist.
