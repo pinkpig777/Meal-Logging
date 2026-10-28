@@ -65,8 +65,8 @@ Set `VITE_API_MOCK=false` to use the real backend. With `AUTH_MODE=dev` (backend
 
 | Variable | Example | Purpose |
 |---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8000/api/v1` | Backend URL |
-| `VITE_SUPABASE_URL` | `http://127.0.0.1:54321` | Supabase URL |
+| `VITE_API_BASE_URL` | `/api/v1` | Backend URL. Relative values go through the Vite dev proxy to `localhost:8000`; use an absolute URL for deployed builds |
+| `VITE_SUPABASE_URL` | `/supabase` | Supabase URL. Relative values go through the Vite dev proxy to `127.0.0.1:54321` |
 | `VITE_SUPABASE_ANON_KEY` | | Public anon key (safe in the browser) |
 | `VITE_AUTH_MODE` | `supabase` / `dev` | Must match the backend |
 | `VITE_API_MOCK` | `true` / `false` | `true` = MSW mocks, no backend needed |
@@ -82,4 +82,4 @@ Never commit `.env` files. Add every new variable to the matching `.env.example`
 
 ## 6. Testing on a phone
 
-Run Vite with `npm run dev -- --host` and open `http://<your-LAN-IP>:5173` on the phone, on the same Wi-Fi network. Camera capture through `<input capture>` works over plain HTTP on a LAN IP in most mobile browsers. If a browser blocks it, use the Vercel preview URL.
+Run Vite with `npm run dev -- --host` and open `http://<your-LAN-IP>:5173` on the phone, on the same Wi-Fi network (macOS: `ipconfig getifaddr en0`). API and Supabase calls go through the Vite proxy, so only port 5173 needs to be reachable; the API can stay bound to localhost. Camera capture through `<input capture>` works over plain HTTP on a LAN IP in most mobile browsers. If a browser blocks it, use the Vercel preview URL.
