@@ -197,6 +197,19 @@ Client-side resize: longest edge 1024 px, JPEG quality 0.8, EXIF orientation app
 | Version | Date | Change | Evidence |
 |---|---|---|---|
 | `analyze_meal.v1` | 2026-10-21 | Initial prompt | — |
-| `analyze_meal.v2` | 2026-10-28 | Hidden-base rule (assume and ask), cooking-style naming, add-ons always separate (with example), rice/beans never add-ons, no double counting, never ask what the text states, `partial` only when food is cut off | First live tests: a sukiyaki-beef bowl with rice hidden underneath (v1 missed the rice, ~250–350 kcal, on both models); a text burrito bowl where v1 folded cheese, sour cream and guac into the dish and asked about toppings the user had named |
+| `analyze_meal.v2` | 2026-10-28 | General **hidden-calories** rule (underneath, inside, mixed in, absorbed in cooking, in drinks): include the typical amount and ask only when it is typical for the dish and uncertain; cuisine-aware naming and cooking method; add-ons always separate (with example), rice/beans/grains never add-ons, no double counting; never ask what the text states; sweetened drinks ask sugar level and toppings before size; `partial` only when food is cut off | First live tests (below) |
 
-Observed with v2 (small sample, not an evaluation): both test inputs now produce the expected structure; whether the hidden rice is included by default still varies between runs, but the rice question is always raised. A repeated-run fixture evaluation (testing strategy §4) is needed before choosing the final allowlist.
+**Spot check of v2 (one run per case, 2026-10-28; not a formal evaluation):**
+
+| Case | Expected | gpt-5.4-mini | gpt-4.1-mini |
+|---|---|---|---|
+| Photo: sukiyaki beef bowl, rice hidden | Ask about rice | ✅ asks; assumes 1 cup | ✅ asks |
+| "chicken quesadilla" | Count cheese inside | ✅ included | ✅ included |
+| "caesar salad" | Handle dressing | ✅ asks dressing amount | ✅ asks dressing amount |
+| "large brown sugar boba milk tea" | Ask sugar level / pearls, not size | ❌ asks size | ✅ asks sugar level and pearls |
+| "takeout chicken fried rice" | Account for oil | ✅ included | ✅ included |
+| Burrito bowl, toppings named | Split add-ons; no redundant question | ✅ | ✅ |
+| Salmon with rice on the side | No hidden-base question | ✅ none | ✅ none |
+| Black coffee, banana | No questions | ✅ none | ✅ none |
+
+Known issues: gpt-5.4-mini still asks drink size; whether a hidden base is included by default varies between runs. Validation now allows ±20 kcal on the energy check, because the 4/4/9 factors overstate high-fiber vegetables and caused needless retries. A repeated-run fixture evaluation (testing strategy §4) is needed before finalizing the model allowlist.

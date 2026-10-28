@@ -8,6 +8,7 @@ from collections.abc import Iterable, Sequence
 from app.schemas.nutrition import KcalRange, Nutrition, NutritionTotals
 
 ENERGY_TOLERANCE = 0.25  # 4p + 4c + 9f within ±25% of kcal
+ENERGY_ABS_FLOOR_KCAL = 20.0
 ENERGY_CHECK_MIN_KCAL = 50.0  # skip the energy check for tiny items
 CURRENT_OPTION_TOLERANCE = 0.05  # current option ≈ item nutrition (±5%)
 RANGE_MIN_SPREAD_KCAL = 30.0  # range is null when high - low < max(30, 10% of kcal)
@@ -21,7 +22,9 @@ def energy_from_macros(n: Nutrition) -> float:
 def is_energy_consistent(n: Nutrition) -> bool:
     if n.kcal < ENERGY_CHECK_MIN_KCAL:
         return True
-    return abs(energy_from_macros(n) - n.kcal) <= ENERGY_TOLERANCE * n.kcal
+    # The 4/4/9 factors overstate energy for high-fiber foods (vegetables), so small items also
+    # get an absolute allowance: broccoli at 55 kcal often computes to ~70 kcal from its macros.
+    return _close(energy_from_macros(n), n.kcal, ENERGY_TOLERANCE, ENERGY_ABS_FLOOR_KCAL)
 
 
 def _close(a: float, b: float, tolerance: float, abs_floor: float) -> bool:

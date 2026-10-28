@@ -93,7 +93,7 @@ def check_item(item: LLMItem, label: str = "item") -> CheckOutcome[LLMItem]:
         macro_kcal = energy_from_macros(_nutrition(item.nutrition))
         errors.append(
             f"{label} ({item.name}): 4*protein + 4*carbs + 9*fat = {macro_kcal:.0f} kcal is not "
-            f"within 25% of kcal = {item.nutrition.kcal:.0f}."
+            f"within 25% (or 20 kcal) of kcal = {item.nutrition.kcal:.0f}."
         )
 
     attr_errors: list[str] = []

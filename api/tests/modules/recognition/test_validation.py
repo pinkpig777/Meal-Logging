@@ -55,6 +55,11 @@ def test_energy_inconsistency_is_an_error() -> None:
     assert "within 25%" in outcome.errors[0]
 
 
+def test_low_calorie_vegetable_within_absolute_allowance_passes() -> None:
+    # Broccoli: 55 kcal stated, 4*4 + 4*11 + 9*1 = 69 kcal from macros (fiber inflates 4/4/9).
+    assert check_item(item(nutrition=nut(55, 4, 11, 1))).ok
+
+
 def test_energy_check_skipped_below_50_kcal() -> None:
     assert check_item(item(nutrition=nut(40, 0, 0, 0))).ok
 
