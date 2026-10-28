@@ -102,8 +102,10 @@ Prompts live in `api/app/services/llm/prompts/` as versioned files (`analyze_mea
 
 **System prompt rules** (summary; the file is authoritative):
 
-1. Split the meal into items **at the level a person would name them** ("chicken burrito", not tortilla + rice + beans).
-2. List **calorie-dense sauces, dressings, oils, and toppings** as separate `addon` items when they are visible or very likely.
+1. Split the meal into items **at the level a person would name them** ("chicken burrito", not tortilla + rice + beans). Rice, beans, grains, noodles, meat, and vegetables stay inside their dish; never count a food twice.
+2. List **calorie-dense sauces, dressings, oils, and toppings** as separate `addon` items when they are visible, named in the user's text, or very likely, even when they sit on a bowl.
+2a. **Look for hidden bases** (rice under donburi, curry, poke; noodles under sauce). Name the dish by cuisine and serving style, assume the typical base, and ask about it with an `ingredient` attribute. *(Added in v2.)*
+2b. Name the **cooking style** correctly (simmered in sweet soy sauce ≠ stir-fried), because it changes fat and sugar. *(Added in v2.)*
 3. Use **familiar units** (cup, piece, slice, tbsp, bowl) and estimate grams.
 4. Report an uncertain attribute only when the answer would **change the estimate meaningfully**. At most 3 per item; ignore garnishes.
 5. Each attribute has 2–4 mutually exclusive options. One option must match the current estimate (`current_option_id`).
@@ -111,7 +113,7 @@ Prompts live in `api/app/services/llm/prompts/` as versioned files (`analyze_mea
 7. For portion attributes, options are nearby familiar amounts (e.g. ½ cup / 1 cup / 1½ cups / 2 cups).
 8. `reason` explains *why* in plain language ("scale is unclear", "sauce is not visible"). Never state a confidence percentage.
 9. If the image does not show food, set `is_food = false` and return no items.
-10. Use the user's text as strong evidence; it overrides visual guesses.
+10. Use the user's text as strong evidence; it overrides visual guesses. Never ask about something the text already states.
 
 **User message:** the image (downloaded from Storage by the API and sent inline as base64, because a local Supabase URL is not reachable by OpenAI; `detail` set for adequate resolution), the optional text, the local time and meal type hint, and the user's dietary restrictions (only as context, never to change the recognized food).
 
@@ -189,3 +191,12 @@ Client-side resize: longest edge 1024 px, JPEG quality 0.8, EXIF orientation app
 | M1-Q1 | Which models go in the allowlist? (Decide after the fixture comparison.) |
 | M1-Q2 | Should text-only input with an obvious single item skip uncertain attributes entirely? |
 | M1-Q3 | Should a second photo angle be supported in the MVP? |
+
+## 7. Prompt history
+
+| Version | Date | Change | Evidence |
+|---|---|---|---|
+| `analyze_meal.v1` | 2026-10-21 | Initial prompt | — |
+| `analyze_meal.v2` | 2026-10-28 | Hidden-base rule (assume and ask), cooking-style naming, add-ons always separate (with example), rice/beans never add-ons, no double counting, never ask what the text states, `partial` only when food is cut off | First live tests: a sukiyaki-beef bowl with rice hidden underneath (v1 missed the rice, ~250–350 kcal, on both models); a text burrito bowl where v1 folded cheese, sour cream and guac into the dish and asked about toppings the user had named |
+
+Observed with v2 (small sample, not an evaluation): both test inputs now produce the expected structure; whether the hidden rice is included by default still varies between runs, but the rice question is always raised. A repeated-run fixture evaluation (testing strategy §4) is needed before choosing the final allowlist.
