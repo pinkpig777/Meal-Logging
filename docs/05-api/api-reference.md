@@ -303,8 +303,8 @@ The M4 owner may change these shapes in the M4 design doc.
   "suggestions": [
     {
       "id": "…",
-      "pattern": { "metric": "protein_g", "summary": "On 4 of your 6 logged days, protein was below your goal by 30 g or more." },
-      "title": "Add a protein-forward snack",
+      "pattern": { "metric": "protein_g", "summary": "On 4 of your 6 logged days with a protein goal, protein was below your goal by at least 30 g and 20%." },
+      "title": "Explore a protein-forward meal or snack",
       "ideas": [
         { "name": "Greek yogurt with berries", "description": "…", "estimated_nutrition": { "kcal": 180, "protein_g": 17, "carbs_g": 20, "fat_g": 3 } }
       ],
@@ -317,13 +317,26 @@ The M4 owner may change these shapes in the M4 design doc.
 
 `status` is `"insufficient_history"` (with empty `suggestions`) when `logged_day_count < required_day_count`.
 
+Recommendations use the previous fourteen calendar days, ending yesterday in the profile's
+time zone. A metric needs three logged days with positive effective goals; each day uses
+its own historical goal. Rules cover recurring low protein/carbs and high fat/calories;
+see [M5 design](../03-design/m5-recommendations-chat.md) for thresholds and ranking. Return
+at most one pattern with two personalized ideas. Historical evidence is computed in code.
+`ideas` may be empty when generation fails or cannot satisfy restrictions; `caveats` explains
+why while retaining the verified pattern. Fixture ideas are labeled as recorded examples.
+No match, missing eligible goals, or all candidates dismissed returns `ok` with no suggestions.
+
 ### `POST /recommendations/feedback` → `204`
 
 ```json
 { "suggestion": { "...": "snapshot of the suggestion" }, "response": "useful" }
 ```
 
-### `POST /chat` → `200` *(scope TBD)*
+Feedback is user-scoped. On subsequent requests, the latest `not_for_me` or `already_do`
+response per metric suppresses that metric for seven days; `useful` leaves it eligible.
+Feedback never changes saved meals.
+
+### `POST /chat` → `200` *(scope TBD; still a placeholder)*
 
 ```json
 { "messages": [ { "role": "user", "content": "Would a burrito fit my goals tonight?" } ] }

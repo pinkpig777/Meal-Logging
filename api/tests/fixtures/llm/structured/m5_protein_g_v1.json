@@ -1,0 +1,15 @@
+{
+  "available": true,
+  "ideas": [
+    {
+      "name": "Greek yogurt with berries",
+      "description": "A cup of plain Greek yogurt topped with a handful of berries; an optional snack idea.",
+      "estimated_nutrition": {"kcal": 180, "protein_g": 17, "carbs_g": 20, "fat_g": 3}
+    },
+    {
+      "name": "Hard-boiled eggs",
+      "description": "Two eggs, prepared ahead for a quick snack.",
+      "estimated_nutrition": {"kcal": 155, "protein_g": 13, "carbs_g": 1, "fat_g": 11}
+    }
+  ]
+}

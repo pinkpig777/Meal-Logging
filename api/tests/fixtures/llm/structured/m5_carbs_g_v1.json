@@ -1,0 +1,25 @@
+{
+  "available": true,
+  "ideas": [
+    {
+      "name": "Oatmeal with banana",
+      "description": "Half a cup of dry oats cooked in water, topped with a banana; an optional meal idea.",
+      "estimated_nutrition": {
+        "kcal": 300,
+        "protein_g": 7,
+        "carbs_g": 62,
+        "fat_g": 4
+      }
+    },
+    {
+      "name": "Rice and beans bowl",
+      "description": "A cup of cooked rice with half a cup of black beans and salsa.",
+      "estimated_nutrition": {
+        "kcal": 350,
+        "protein_g": 11,
+        "carbs_g": 70,
+        "fat_g": 3
+      }
+    }
+  ]
+}
