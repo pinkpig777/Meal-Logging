@@ -1,112 +1,121 @@
-"""M5 service: suggestions grounded in logged days, feedback, chat.
+"""M5 orchestration: verified patterns, personalized ideas, and feedback.
 
-Owner: Zach.
-TODO(Zach): replace the rule-based placeholder with the M5 design (LLM-generated ideas via
-`app.services.llm.client.structured`, more patterns, wording rules, evaluation).
+Only suggestion feedback is written here. Chat remains a separate, unfinished feature.
 """
 
-from datetime import timedelta
-from uuid import UUID, uuid5
+import logging
+from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 from supabase import Client
 
+from app.core.config import get_settings
 from app.modules.meals import repository
-from app.modules.meals.schemas import DailyTotalsRecord
+from app.modules.recommendations.generation import generate_ideas
+from app.modules.recommendations.patterns import (
+    LOOKBACK_DAYS,
+    REQUIRED_DAY_COUNT,
+    build_suggestions,
+)
 from app.modules.recommendations.schemas import (
     ChatMessage,
     ChatReferences,
     ChatRequest,
     ChatResponse,
     RecommendationsResponse,
-    Suggestion,
-    SuggestionEvidence,
     SuggestionFeedbackRequest,
-    SuggestionIdea,
-    SuggestionPattern,
 )
-from app.schemas import MealStatus, Nutrition
+from app.schemas import MealStatus
+from app.services.llm.client import LLMError
 
-REQUIRED_DAY_COUNT = 3
-LOOKBACK_DAYS = 14
-PROTEIN_GAP_G = 30.0
-_SUGGESTION_NAMESPACE = UUID("5b1d3c9e-0f7a-4c55-9a51-6f3f2b8f9d10")
-
-CAVEATS = ["Based only on days you logged.", "Nutrition values are estimates."]
+logger = logging.getLogger(__name__)
+FEEDBACK_COOLDOWN_DAYS = 7
 
 
-def protein_gap_days(rows: list[DailyTotalsRecord]) -> list[DailyTotalsRecord]:
-    return [
-        r
-        for r in rows
-        if r.goal_protein_g is not None and r.goal_protein_g - r.protein_g >= PROTEIN_GAP_G
-    ]
-
-
-def build_suggestions(
-    rows: list[DailyTotalsRecord], meal_ids_by_date: dict[str, list[UUID]]
-) -> list[Suggestion]:
-    """Rule-based placeholder: protein below goal by >= 30 g on at least half the logged days."""
-    suggestions: list[Suggestion] = []
-    low = protein_gap_days(rows)
-    if rows and len(low) * 2 >= len(rows):
-        dates = [r.local_date for r in low]
-        summary = (
-            f"On {len(low)} of your {len(rows)} logged days, protein was below your goal by "
-            f"{PROTEIN_GAP_G:.0f} g or more."
-        )
-        suggestions.append(
-            Suggestion(
-                id=uuid5(_SUGGESTION_NAMESPACE, "protein_g:" + ",".join(map(str, dates))),
-                pattern=SuggestionPattern(metric="protein_g", summary=summary),
-                title="Add a protein-forward snack",
-                ideas=[
-                    SuggestionIdea(
-                        name="Greek yogurt with berries",
-                        description="A cup of plain Greek yogurt topped with a handful of berries.",
-                        estimated_nutrition=Nutrition(kcal=180, protein_g=17, carbs_g=20, fat_g=3),
-                    ),
-                    SuggestionIdea(
-                        name="Hard-boiled eggs",
-                        description="Two eggs, easy to prepare ahead for busy days.",
-                        estimated_nutrition=Nutrition(kcal=155, protein_g=13, carbs_g=1, fat_g=11),
-                    ),
-                ],
-                evidence=SuggestionEvidence(
-                    dates=dates,
-                    meal_ids=[m for d in dates for m in meal_ids_by_date.get(d.isoformat(), [])],
-                    observations=[
-                        f"{r.local_date.isoformat()}: {r.protein_g:.0f} g protein "
-                        f"(goal {r.goal_protein_g:.0f} g)"
-                        for r in low
-                    ],
-                ),
-                caveats=CAVEATS,
-            )
-        )
-    return suggestions
+def dismissed_metrics(db: Client, user_id: UUID) -> set[str]:
+    """Latest feedback per metric wins, across evidence changes, for seven days."""
+    cutoff = datetime.now(UTC) - timedelta(days=FEEDBACK_COOLDOWN_DAYS)
+    result = (
+        db.table("suggestion_feedback")
+        .select("suggestion,response,created_at")
+        .eq("user_id", str(user_id))
+        .gte("created_at", cutoff.isoformat())
+        .order("created_at", desc=True)
+        .limit(500)
+        .execute()
+    )
+    seen: set[str] = set()
+    dismissed: set[str] = set()
+    for row in result.data or []:
+        if not isinstance(row, dict):
+            continue
+        snapshot = row.get("suggestion")
+        if not isinstance(snapshot, dict):
+            continue
+        pattern = snapshot.get("pattern")
+        metric = pattern.get("metric") if isinstance(pattern, dict) else None
+        if not isinstance(metric, str) or metric in seen:
+            continue
+        seen.add(metric)
+        if row.get("response") in ("not_for_me", "already_do"):
+            dismissed.add(metric)
+    return dismissed
 
 
 def get_recommendations(db: Client, user_id: UUID) -> RecommendationsResponse:
-    today = repository.today_for(repository.get_profile(db, user_id).timezone)
-    date_from = today - timedelta(days=LOOKBACK_DAYS - 1)
-    rows = repository.list_daily_totals(db, user_id, date_from, today)
-    if len(rows) < REQUIRED_DAY_COUNT:
-        return RecommendationsResponse(
-            status="insufficient_history",
-            logged_day_count=len(rows),
-            required_day_count=REQUIRED_DAY_COUNT,
-            suggestions=[],
-        )
-    meals = repository.list_meals(db, user_id, date_from, today, MealStatus.confirmed)
+    profile = repository.get_profile(db, user_id)
+    today = repository.today_for(profile.timezone)
+    # Use the previous fourteen calendar days. Do not treat today's breakfast as a full day.
+    date_to = today - timedelta(days=1)
+    date_from = today - timedelta(days=LOOKBACK_DAYS)
+    rows = repository.list_daily_totals(db, user_id, date_from, date_to)
+    response = RecommendationsResponse(
+        status="insufficient_history" if len(rows) < REQUIRED_DAY_COUNT else "ok",
+        logged_day_count=len(rows),
+        required_day_count=REQUIRED_DAY_COUNT,
+        suggestions=[],
+    )
+    if response.status == "insufficient_history":
+        return response
+    meals = repository.list_meals(db, user_id, date_from, date_to, MealStatus.confirmed)
     meal_ids_by_date: dict[str, list[UUID]] = {}
     for meal in meals:
         meal_ids_by_date.setdefault(meal.local_date.isoformat(), []).append(meal.id)
-    return RecommendationsResponse(
-        status="ok",
-        logged_day_count=len(rows),
-        required_day_count=REQUIRED_DAY_COUNT,
-        suggestions=build_suggestions(rows, meal_ids_by_date),
-    )
+    candidates = build_suggestions(rows, meal_ids_by_date)
+    if not candidates:
+        return response
+    dismissed = dismissed_metrics(db, user_id)
+    candidates = [s for s in candidates if s.pattern.metric not in dismissed]
+    if not candidates:
+        return response
+    current_goal = repository.effective_goal(repository.list_goals(db, user_id), today)
+    suggestion = candidates[0]  # One clear pattern and two ideas, rather than a long feed.
+    foods = list(dict.fromkeys(item.name[:100] for meal in meals for item in meal.items))[:30]
+    try:
+        generated = generate_ideas(
+            suggestion,
+            user_id=str(user_id),
+            model=get_settings().resolve_model(profile.analysis_model),
+            restrictions=profile.dietary_restrictions,
+            foods=foods,
+            current_goal=current_goal.model_dump(mode="json", exclude={"id"})
+            if current_goal
+            else None,
+        )
+        suggestion.ideas = generated.ideas
+        if not generated.available:
+            suggestion.caveats.append(
+                "Personalized meal ideas are unavailable for this pattern or these restrictions."
+            )
+        elif get_settings().llm_mode == "fixture":
+            suggestion.caveats.append("Demo meal ideas use recorded example estimates.")
+    except LLMError:
+        # Keep trustworthy evidence visible when idea generation fails. Never substitute
+        # unrestricted generic foods or cache the failure as a successful generation.
+        logger.info("M5 idea generation unavailable")
+        suggestion.caveats.append("Meal ideas are temporarily unavailable. Try again later.")
+    response.suggestions = [suggestion]
+    return response
 
 
 def record_feedback(db: Client, user_id: UUID, body: SuggestionFeedbackRequest) -> None:

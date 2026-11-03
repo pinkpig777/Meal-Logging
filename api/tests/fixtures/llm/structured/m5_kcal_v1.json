@@ -1,0 +1,25 @@
+{
+  "available": true,
+  "ideas": [
+    {
+      "name": "Chicken and vegetable bowl",
+      "description": "An optional meal alternative: grilled chicken, a modest serving of rice, and vegetables.",
+      "estimated_nutrition": {
+        "kcal": 450,
+        "protein_g": 35,
+        "carbs_g": 55,
+        "fat_g": 10
+      }
+    },
+    {
+      "name": "Bean and vegetable bowl",
+      "description": "An optional meal alternative: beans, half a cup of rice, vegetables, and salsa.",
+      "estimated_nutrition": {
+        "kcal": 390,
+        "protein_g": 16,
+        "carbs_g": 65,
+        "fat_g": 7
+      }
+    }
+  ]
+}

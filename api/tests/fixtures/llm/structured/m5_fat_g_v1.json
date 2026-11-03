@@ -1,0 +1,25 @@
+{
+  "available": true,
+  "ideas": [
+    {
+      "name": "Grilled chicken and rice",
+      "description": "An optional alternative: grilled chicken breast with rice and vegetables, with sauce on the side.",
+      "estimated_nutrition": {
+        "kcal": 480,
+        "protein_g": 40,
+        "carbs_g": 62,
+        "fat_g": 8
+      }
+    },
+    {
+      "name": "Lentil and vegetable soup",
+      "description": "An optional alternative: a large bowl of lentil soup with vegetables, using a small amount of oil.",
+      "estimated_nutrition": {
+        "kcal": 360,
+        "protein_g": 20,
+        "carbs_g": 55,
+        "fat_g": 7
+      }
+    }
+  ]
+}

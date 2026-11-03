@@ -2,80 +2,130 @@
 
 | | |
 |---|---|
-| **Status** | Draft: skeleton, owner to complete |
+| **Status** | Recommendations implemented; chat planned |
 | **Owner** | Zach Pena |
 | **Reviewers** | Charlie Chiu (LLM client), Xiaochuan Ge (M4) |
-| **Last updated** | 2026-10-21 |
-| **Related** | ADR-0003, ADR-0005, [API reference §7](../05-api/api-reference.md#7-m5-suggestions-and-chat), [Glossary](../00-overview/glossary.md) |
+| **Last updated** | 2026-10-30 |
+| **Related** | ADR-0003, ADR-0005, [API reference §7](../05-api/api-reference.md#7-m5-suggestions-and-chat) |
 
-> Sections marked **[Owner]** are for Zach to complete. Chat is **in scope only if time allows** (product brief Q3).
+## 1. Responsibilities and implementation boundary
 
-## 1. Context
+M5 detects patterns in confirmed meal history, proposes hypothetical meals or snacks,
+explains the recorded evidence, and collects suggestion feedback. The initial implementation
+extends the existing recommendation cards and endpoints without changing their JSON shapes.
+It does not change meal records, goals, logging completeness, or the shared LLM client.
 
-Confirmed meals and goals reveal patterns, such as protein below goal on most logged days. M5 turns **one clear pattern** into a small number of familiar meal or snack ideas. Each idea comes with the evidence behind it, and the user can respond to it. Optional grounded chat answers questions such as "Would a burrito fit my goals tonight?" using only stored records.
+Grounded chat is a separate next increment. Its existing page and endpoint still return a
+placeholder. Suggestions and future chat discussions never become confirmed meals implicitly.
 
-## 2. Responsibilities
+## 2. Pattern rules
 
-From the Task & Team document:
+Use the **previous fourteen calendar days**, ending yesterday in the profile's time zone.
+Today is excluded because it is still in progress. Unlogged dates are unknown, not zero;
+no synthetic rows enter pattern calculations. A logged day still means at least one confirmed
+meal, as required by ADR-0005. We do not infer completeness from meal count.
 
-- Analyze confirmed meal history against goals; rules for selecting relevant patterns.
-- Generate personalized suggestions with OpenAI; explain them with evidence from saved meals.
-- Recommendation card UI and feedback controls.
-- Chat interface grounded in confirmed history, goals, and preferences *(TBD)*.
-- Keep hypothetical foods separate from logged meals.
-- Coordinate usability testing and evaluate suggestion usefulness.
+Every candidate metric needs at least **three logged days with a positive effective goal**.
+Days without a goal, or with a zero target for that macro, are excluded for that metric.
+Compare each day to the goal in effect on that day, including when goals changed during
+the window. At least half of eligible days, and at least two days, must meet both thresholds:
 
-## 3. Interfaces
+| Pattern | Absolute difference | Relative difference | Suggested direction |
+|---|---|---|---|
+| Protein below goal | ≥30 g | ≥20% of that day's goal | Protein-forward meal or snack |
+| Carbs below goal | ≥40 g | ≥20% | Carbohydrate-forward meal or snack |
+| Fat above goal | ≥15 g | ≥20% | Optional meal alternative with less added fat |
+| Calories above goal | ≥300 kcal | ≥15% | Optional meal alternative closer to the goal |
 
-| Direction | Interface |
-|---|---|
-| API | `GET /recommendations`, `POST /recommendations/feedback`, `POST /chat` |
-| Data in | Confirmed meals and `daily_totals` (via M3 and M4 services), goals, `profiles.dietary_restrictions`, `suggestion_feedback` |
-| LLM | `services/llm.structured(prompt, schema)`; never import OpenAI directly |
-| UI | `/suggestions`, `/chat` (`web/src/features/suggestions/`) |
+These are initial product thresholds to evaluate, not dietary prescriptions. A low-calorie
+rule is intentionally deferred: incomplete records do not establish under-eating.
 
-## 4. Fixed constraints
+Rank candidates by the fraction of eligible days matching, then by mean relative difference
+on matching days. Rule order breaks ties. Show **one pattern with two ideas** to keep the
+page focused. Missing goals, no recurring pattern, or dismissal of every candidate produce
+`status=ok` with an empty suggestions list. Fewer than three logged days produces
+`status=insufficient_history`. More specific empty-state UI is future work.
 
-- **Pattern detection is rule-based and computed from stored data.** The LLM only phrases ideas for a pattern the rules already selected. Numbers shown to users come from the data, not from the LLM.
-- ADR-0005: days are assumed fully logged, but partial logging is possible. Phrase patterns as "on the days you logged", and require a minimum number of logged days (starter: 3).
-- Missing logs are never evidence of under-eating.
-- Neutral, non-judgmental language; no medical advice.
-- Hypothetical meals (suggestions, chat) never enter meal history.
-- Feedback options: **Useful**, **Not for me**, **I already do this**.
-- Proactive notifications and lapse prediction are out of scope.
+## 3. Personalized generation
 
-## 5. Starter-code baseline
+`generation.py` calls only `app.services.llm.client.structured`; it never imports OpenAI.
+The model is resolved from the profile's existing allowlisted choice and server default.
+There are no new environment variables or dependencies.
 
-`GET /recommendations` returns `insufficient_history` below 3 logged days. Otherwise it returns one placeholder suggestion from a simple rule, with evidence. Feedback is stored. Chat returns a placeholder response.
+Inputs are the selected code-computed pattern and evidence, the current effective goal,
+dietary restrictions, and up to thirty unique food names from confirmed meals in the window.
+Food names are bounded to 100 characters. They are context, not an inferred preference.
+No photos, descriptions, user identifiers, or meal IDs are sent as prompt content.
 
-## 6. Design **[Owner]**
+The model returns exactly two ideas with serving descriptions and estimated calories/macros,
+or explicitly reports that suitable ideas are unavailable. Historical counts, dates, goals,
+evidence links, and the card title remain under code control. The prompt treats all embedded
+user strings as untrusted data and asks for neutral wording and no medical claims.
+Above-goal ideas are alternatives, not extra snacks or instructions to compensate.
 
-### 6.1 Pattern rules
+Validation rejects incomplete idea sets, blank/oversized text, non-finite or zero-energy
+estimates, estimates over 2,000 kcal per idea, and implausible macro-energy disagreement.
+This checks structure and basic plausibility, **not nutrient accuracy or allergen safety**.
+Restrictions are prompt constraints; live output still needs a reviewed evaluation set.
 
-Points to address: candidate patterns (macro below or above goal on N of M logged days, meal-timing patterns, etc.), the rolling window, thresholds, how one pattern is picked, and how `suggestion_feedback` affects future picks.
+Successful results are cached in memory per worker, in fifteen-minute time buckets, bounded
+to 128 entries. Keys include the user, prompt inputs, model, mode, and time bucket. Changed
+constraints or evidence produce different inputs. No cache or conversation table is added.
+Concurrent misses can still make duplicate calls; cross-worker caching and rate limits remain
+future work. LLM failures are not cached: the verified pattern remains visible with no ideas
+and a temporary-unavailability caveat. Never substitute generic foods after an error.
 
-### 6.2 Suggestion generation
+Fixture mode uses one recorded two-idea example per pattern. It makes no network calls and
+labels these as demo estimates. Fixtures are not tailored to restrictions: with any restriction,
+show the pattern without food ideas and explain their unavailability.
 
-Points to address: prompt inputs (pattern, restrictions, foods the user commonly logs), output schema, the number of ideas (Phase 2: two), and caching (generate on request vs. once per day).
+## 4. Evidence and incomplete records
 
-### 6.3 "Why this suggestion"
+Each card's existing **Why this suggestion** section receives matching local dates, confirmed
+meal IDs for those dates, and code-formatted observed values alongside historical goals.
+Suggestion IDs are deterministic for the metric, eligible-day count, and matching values/goals.
+They change when those inputs change. Links continue to open the existing day and meal pages.
 
-Points to address: which evidence is shown (dates, meals, values), links into meal records, and caveats.
+Caveats state that values are estimates, only logged days are represented, missing meals can
+change the pattern, and today is excluded. Backfilling can correct incomplete records. These
+warnings do not establish completeness; the product deliberately does not track that state.
 
-### 6.4 Grounded chat (if in scope)
+## 5. Feedback
 
-Points to address: the retrieval strategy (which records go into context), arithmetic done in code rather than by the LLM, how hypothetical meals are marked, refusal boundaries, and persistence (data model D1).
+Continue storing the displayed suggestion snapshot and response in `suggestion_feedback`
+through the caller's RLS-scoped client. On subsequent recommendation requests, read the most
+recent seven days of feedback (at most 500 records, newest first). Latest response per metric
+wins. **Not for me** or **I already do this** suppresses that metric for seven days after that
+response, across changing evidence IDs. **Useful** leaves the metric eligible.
 
-## 7. Evaluation plan contribution **[Owner]**
+Suppression happens before generation, so dismissed candidates make no LLM call. If another
+candidate is eligible, show it instead. Feedback is user-scoped and never changes meal history.
+The existing page acknowledges submission; immediate dismissal and persistent positive-button
+state are future UI improvements.
 
-Zach coordinates `08-evaluation/usability-study-plan.md` (planned): tasks, measures, and comparison conditions.
+## 6. Testing and trying it
 
-## 8. Testing **[Owner]**
+The default offline suite exercises rule thresholds, historical/zero/missing goals, sparse
+history, ranking, fixture generation, restricted fixtures, cache isolation, output validation,
+feedback behavior, confirmed-only retrieval, current-day exclusion, and generation failure.
+Endpoint tests use the shared in-memory repository and verify no meal records change.
 
-## 9. Open questions
+To exercise the real recommendation backend locally, use the README's full-stack fixture
+setup with `VITE_API_MOCK=false`. Log and confirm meals on at least three past dates within
+the last fourteen days and set goals effective on those dates. Open Suggestions, expand
+Why this suggestion, submit feedback, and revisit/refetch the page.
 
-| # | Question |
-|---|---|
-| M5-Q1 | Is chat in scope for the final demo? |
-| M5-Q2 | How many logged days are needed before suggestions appear? |
-| M5-Q3 | Are suggestions regenerated on every visit or cached per day? |
+With `VITE_API_MOCK=true`, the independent browser mock still supplies illustrative demo
+responses; it does not execute the Python rules. Live generation additionally requires
+`LLM_MODE=live`, an OpenAI key, and the configured allowlist. Automated checks do not spend
+API credits or prove live recommendation quality or hosted Supabase behavior.
+
+## 7. Next work
+
+- Improve empty states for absent goals and dismissed patterns; immediately hide dismissed cards.
+- Add grounded chat: bounded confirmed-history retrieval, code-computed arithmetic, citations,
+  failed-message recovery, and explicit separation of hypothetical meals.
+- Evaluate relevance, restriction compliance, neutral language, and prompt-injection resistance
+  using live outputs and a reviewed fixture set. Current prompt checks are not an adversarial eval.
+- Coordinate usability tasks measuring usefulness and whether users can explain the evidence.
+- Decide whether conversations should persist; no chat database migration is made here.
