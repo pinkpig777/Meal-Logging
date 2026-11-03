@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.16.1",
     "pyjwt>=2.15.1",
     "supabase>=2.33.0",
+    "tzdata>=2026.6",
 ]
 
 [dependency-groups]
