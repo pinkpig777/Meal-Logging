@@ -1,0 +1,6 @@
+{
+  "answer": "Here is the recorded daily average for the selected period. It reflects only the days you logged, so missing meals can change the picture.",
+  "fact_ids": ["period_average", "coverage"],
+  "meal_ids": [],
+  "meal_draft": null
+}

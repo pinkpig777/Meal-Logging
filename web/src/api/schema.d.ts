@@ -381,7 +381,7 @@ export interface paths {
     put?: never;
     /**
      * Post Chat
-     * @description Grounded chat (scope TBD). Currently returns a placeholder reply.
+     * @description Read-only chat about confirmed meals in the selected time window.
      */
     post: operations['post_chat'];
     delete?: never;
@@ -483,6 +483,12 @@ export interface components {
     ChatRequest: {
       /** Messages */
       messages: components['schemas']['ChatMessage'][];
+      /**
+       * Period
+       * @default last_14_days
+       * @enum {string}
+       */
+      period: 'today' | 'this_week' | 'last_week' | 'last_14_days';
     };
     /** ChatResponse */
     ChatResponse: {

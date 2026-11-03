@@ -492,14 +492,37 @@ export const handlers = [
 
   http.post(url('/chat'), async ({ request }) => {
     const body = (await request.json()) as ChatRequest;
-    const last = body.messages[body.messages.length - 1]?.content ?? '';
-    await delay(800);
+    const end = body.period === 'last_week' ? addDays(mondayOf(today()), -1) : today();
+    const start =
+      body.period === 'today'
+        ? today()
+        : body.period === 'this_week'
+          ? mondayOf(today())
+          : body.period === 'last_week'
+            ? addDays(mondayOf(today()), -7)
+            : addDays(today(), -13);
+    const days: DayPoint[] = [];
+    for (let d = start; d <= end; d = addDays(d, 1)) days.push(dayPoint(d));
+    const logged = days.filter((d) => d.logged && d.totals !== null);
+    const supportingMeals = [...db.meals.values()].filter(
+      (m) => m.status === 'confirmed' && m.local_date >= start && m.local_date <= end,
+    );
+    await delay(400);
+    const summary =
+      logged.length > 0
+        ? `Estimated daily average over ${logged.length} logged days: ${Math.round(
+            logged.reduce((sum, d) => sum + (d.totals?.protein_g ?? 0), 0) / logged.length,
+          )} g protein. Days without meals are unknown, not zero.`
+        : 'No confirmed meals are recorded in this period. Choose another period or confirm a meal.';
     return HttpResponse.json({
       message: {
         role: 'assistant',
-        content: `(Mock reply) Based on the days you logged, here is how "${last.slice(0, 60)}" might fit your goals. Chat answers will use your confirmed meals and goals only.`,
+        content: `Selected period: ${start} to ${end}.\n\nDemo response from the browser mock; live AI answers are not enabled.\n\n${summary}\n\nDiscussing a food here does not save or change meals.`,
       },
-      references: { meal_ids: [], dates: [] },
+      references: {
+        meal_ids: supportingMeals.slice(0, 3).map((m) => m.id),
+        dates: logged.map((d) => d.date),
+      },
     });
   }),
 ];

@@ -1530,7 +1530,7 @@
           "recommendations"
         ],
         "summary": "Post Chat",
-        "description": "Grounded chat (scope TBD). Currently returns a placeholder reply.",
+        "description": "Read-only chat about confirmed meals in the selected time window.",
         "operationId": "post_chat",
         "requestBody": {
           "content": {
@@ -1871,8 +1871,20 @@
               "$ref": "#/components/schemas/ChatMessage"
             },
             "type": "array",
+            "maxItems": 20,
             "minItems": 1,
             "title": "Messages"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "today",
+              "this_week",
+              "last_week",
+              "last_14_days"
+            ],
+            "title": "Period",
+            "default": "last_14_days"
           }
         },
         "type": "object",

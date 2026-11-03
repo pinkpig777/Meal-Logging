@@ -18,10 +18,6 @@ from app.modules.recommendations.patterns import (
     build_suggestions,
 )
 from app.modules.recommendations.schemas import (
-    ChatMessage,
-    ChatReferences,
-    ChatRequest,
-    ChatResponse,
     RecommendationsResponse,
     SuggestionFeedbackRequest,
 )
@@ -123,15 +119,3 @@ def record_feedback(db: Client, user_id: UUID, body: SuggestionFeedbackRequest) 
     db.table("suggestion_feedback").insert(
         {"user_id": str(user_id), "suggestion": body.suggestion, "response": body.response.value}
     ).execute()
-
-
-def chat(body: ChatRequest) -> ChatResponse:
-    # TODO(Zach): grounded chat (scope TBD in the M5 design doc). Canned reply for now.
-    return ChatResponse(
-        message=ChatMessage(
-            role="assistant",
-            content="Chat isn't available yet. Check the Suggestions tab for ideas based on "
-            "the days you logged.",
-        ),
-        references=ChatReferences(meal_ids=[], dates=[]),
-    )

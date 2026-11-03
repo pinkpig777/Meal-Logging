@@ -59,7 +59,56 @@ Points to address: list vs. calendar navigation, how to log for a past date (fro
 
 ### 6.3 Settings page
 
-Points to address: goal entry (presets? units?), how goal history is shown, model picker copy (ADR-0006), time zone, sign out, delete account.
+Goal setup now starts with a summary of current daily targets and a **Set goals** action.
+Users can enter targets manually or choose Standard, High protein, Low carb, or Keto.
+Each preset starts from editable calories (the current goal, or a clearly editable 2,000-kcal
+starting value when no goal exists). A preview converts calorie shares to rounded grams:
+
+| Template | Protein | Carbs | Fat |
+|---|---|---|---|
+| Standard | 20% | 50% | 30% |
+| High protein | 30% | 40% | 30% |
+| Low carb | 30% | 25% | 45% |
+| Keto | 20% | 5% | 75% |
+
+These are editable product templates, not individualized dietary recommendations. The
+standard split is within adult macronutrient distribution ranges; the restrictive templates
+are user-selected alternatives, not recommended defaults. Keto does not promise ketosis.
+Conversion uses 4 kcal/g for protein and carbohydrate and 9 kcal/g for fat. Rounded gram
+targets can differ slightly in implied calories. An advisory flags larger differences in
+the editable review form without preventing deliberate manual targets.
+
+The optional calorie estimator uses adult Estimated Energy Requirement (EER) equations
+published by [Health Canada](https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/dietary-reference-intakes/tables/equations-estimate-energy-requirement.html).
+It takes age, the published equation's sex category, height, weight, and a four-stop activity
+slider (Inactive, Low active, Active, Very active). The equations directly estimate daily
+maintenance needs; there is no additional activity multiplier, automatic deficit, surplus,
+or weight-change claim. Estimates round to 50 kcal and remain editable. The activity
+descriptions summarize categories, not validated activity classification.
+
+The calculator supports ages 19–100, heights 120–230 cm, and weights 35–300 kg (or equivalent
+US inches/pounds); these are product input bounds, not clinical adequacy thresholds. Users
+confirm they are 19+ and not pregnant/breastfeeding before using this general adult estimate.
+Other users can enter their own targets. Blank or invalid inputs never produce a zero-calorie
+recommendation. Unit switching converts entered measurements rather than relabeling them.
+Source equations use kg/cm regardless of displayed input units. Individual needs differ from
+estimates; monitor and adjust rather than assuming the equation measures actual expenditure.
+
+All paths lead to a shared review form with editable calorie/macro values and an optional
+effective date. Nothing saves until **Save goal**. An omitted date uses the backend's profile
+time zone for today, avoiding device/profile date mismatch. Historical goal behavior and
+same-day replacement remain unchanged. Pending saves disable edits/submission; errors retain
+entered targets for correction/retry. Cancel never writes. Goal query invalidation continues
+to refresh goals, analytics, and recommendations through existing hooks.
+
+Age, equation sex, height, weight, activity, and eligibility remain transient form state.
+They are neither sent to OpenAI nor saved in the profile, browser storage, or goal body.
+Only the existing target numbers and optional effective date reach `POST /goals`. The UI
+does not remember these measurements after the estimator is closed or the page is left.
+No API schema, backend, dependency, database, or environment changes are needed.
+
+Still open: goal history presentation, model picker copy (ADR-0006), time zone, sign out,
+and account deletion.
 
 ### 6.4 Data lifecycle
 
@@ -68,6 +117,18 @@ Points to address: abandoned-draft cleanup (data model D2), account deletion and
 ## 7. Testing **[Owner]**
 
 Cover RLS (a user cannot read or modify another user's rows), repository CRUD, the confirm state guard, goal effective-date resolution, and photo deletion.
+
+Goal-setup tests additionally cover all eight adult sex/activity equation combinations,
+unit equivalence and switching, invalid inputs, preset arithmetic, review before saving,
+manual-entry blanks, measurement privacy in the request, explicit dates, save failure, and
+duplicate-submit prevention. Manually review Settings at 375 px in light/dark modes and
+verify saved goals appear in Today and affect subsequent chat comparisons.
+
+Calculation references:
+
+- [Adult EER equations](https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/dietary-reference-intakes/tables/equations-estimate-energy-requirement.html)
+- [Energy DRI applications and individual variation](https://www.ncbi.nlm.nih.gov/books/NBK591020/)
+- [Macronutrient reference values](https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/dietary-reference-intakes/tables/reference-values-macronutrients.html)
 
 ## 8. Open questions
 

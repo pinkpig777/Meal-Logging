@@ -231,7 +231,7 @@ One row per uncertain attribute reported by the analysis. The clarification poli
 | `response` | `suggestion_response` | no | |
 | `created_at` | `timestamptz` | no | |
 
-Suggestions themselves are generated on request and not stored. Chat storage is undecided (see Open questions).
+Suggestions themselves are generated on request and not stored. Chat is currently held only in the mounted frontend page; no conversations are stored in Postgres.
 
 ## 5. JSON shapes
 
@@ -311,7 +311,7 @@ Every table has RLS enabled, with policies for `select`, `insert`, `update`, and
 
 | # | Question | Owner |
 |---|---|---|
-| D1 | Should chat conversations be persisted? If so, which tables? | Zach |
+| D1 | Current chat is page-local only; revisit persistence if needed (M5 design §7). | Zach |
 | D2 | Should abandoned drafts be purged automatically, and after how long? | Yi-Wei |
 | D3 | Should `local_date` be recomputed if a user changes time zone? (Current answer: no.) | Yi-Wei |
 | D4 | Is the `(user_id, effective_from)` same-day replacement rule sufficient for goal edits? | Yi-Wei |
