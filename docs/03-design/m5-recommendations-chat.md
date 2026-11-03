@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | Recommendations implemented; chat planned |
+| **Status** | Recommendations and initial grounded chat implemented |
 | **Owner** | Zach Pena |
 | **Reviewers** | Charlie Chiu (LLM client), Xiaochuan Ge (M4) |
-| **Last updated** | 2026-10-30 |
+| **Last updated** | 2026-11-02 |
 | **Related** | ADR-0003, ADR-0005, [API reference §7](../05-api/api-reference.md#7-m5-suggestions-and-chat) |
 
 ## 1. Responsibilities and implementation boundary
@@ -15,8 +15,9 @@ explains the recorded evidence, and collects suggestion feedback. The initial im
 extends the existing recommendation cards and endpoints without changing their JSON shapes.
 It does not change meal records, goals, logging completeness, or the shared LLM client.
 
-Grounded chat is a separate next increment. Its existing page and endpoint still return a
-placeholder. Suggestions and future chat discussions never become confirmed meals implicitly.
+Grounded chat now reads confirmed meal history and goals through the existing M3 repository.
+It uses the shared structured-output client. Suggestions and chat discussions never become
+confirmed meals implicitly. Chat does not write any meal, item, profile, goal, or feedback row.
 
 ## 2. Pattern rules
 
@@ -120,12 +121,154 @@ responses; it does not execute the Python rules. Live generation additionally re
 `LLM_MODE=live`, an OpenAI key, and the configured allowlist. Automated checks do not spend
 API credits or prove live recommendation quality or hosted Supabase behavior.
 
-## 7. Next work
+## 7. Grounded chat
 
-- Improve empty states for absent goals and dismissed patterns; immediately hide dismissed cards.
-- Add grounded chat: bounded confirmed-history retrieval, code-computed arithmetic, citations,
-  failed-message recovery, and explicit separation of hypothetical meals.
-- Evaluate relevance, restriction compliance, neutral language, and prompt-injection resistance
-  using live outputs and a reviewed fixture set. Current prompt checks are not an adversarial eval.
+### 7.1 Request and retrieval
+
+`POST /chat` accepts up to twenty messages, each at most 4,000 characters, with a combined
+limit of 20,000 characters. The final message must be a non-blank user question. Optional
+`period` defaults to `last_14_days`; supported values are `today`, `this_week`, `last_week`,
+and `last_14_days`. All dates use the profile's time zone; weeks start on Monday. Today and
+this week end today; last week ends Sunday. The last-fourteen-days option includes today.
+Unlike recurring recommendation patterns, chat may report today's recorded intake so far.
+
+Each request retrieves current records anew with the caller's RLS-scoped client. Only
+confirmed meals in the selected window are included. Aggregate facts use all daily-total
+rows in the window. Detailed context contains at most twenty recent meals, at most eight
+food names per meal, and at most eighty characters per food name. Truncation is explicit.
+No photos, signed photo URLs, raw meal descriptions, or original AI predictions are sent.
+Dietary restrictions, the current effective goal, and the bounded conversation provide context.
+
+The frontend labels and locks the selected period during a conversation. To change it, start
+a new conversation. If a question asks for a different window, the prompt requests that the
+user change the selector instead of silently using the wrong period. Arbitrary date ranges,
+search over older history, and automatic intent-based retrieval remain future work.
+
+### 7.2 Numeric grounding and citations
+
+Python constructs a catalog of coverage, period totals, logged-day averages, daily intake,
+historical goals, daily goal comparisons, current goals, and recent meal totals. Missing
+dates are never zero and do not enter the average denominator. Unlogged dates have no
+remaining-intake comparison. Differences preserve above/below direction instead of clipping
+an above-goal value to zero. Goal comparisons use that day's effective goal.
+
+The model returns short qualitative prose, selected fact IDs, supporting meal IDs, and an
+optional internal hypothetical meal draft (see §7.6). Its
+prose for record summaries cannot contain digits; numeric responses are rendered from catalog facts
+by the server. Unknown fact IDs and meal IDs outside the retrieved context fail with
+`LLM_INVALID_OUTPUT`. Dates are derived from selected facts and verified meals, never invented
+by the model. Selecting a meal fact automatically includes that meal's link. The existing
+ChatResponse shape is retained: message plus meal/date references.
+
+These checks constrain schema, numeric rendering, and reference existence. They do not prove
+that qualitative prose is correct, that an existing reference supports every assertion, or
+that prompt injection cannot succeed. Live evaluation remains required. Hypothetical food
+estimates are labeled separately from recorded facts and never establish an exact allowance
+or imply that a food is saved.
+
+### 7.3 Empty, fixture, and failure states
+
+No confirmed history produces a deterministic explanatory reply without an LLM call. One
+logged day is sufficient for a clearly qualified summary; chat does not require the three-day
+threshold used for recurring recommendation patterns. All replies identify the selected
+window and remind users that values are estimates and chat never saves meals.
+
+Fixture mode loads `m5_chat_v1.json`: a generic recorded response selecting the code-computed
+period average and coverage. It is explicitly labeled a demo and does not interpret each
+question. The browser mock also returns a labeled demo with supporting links. Neither
+fixture mode nor browser mock mode demonstrates live conversational quality.
+
+Live errors use the existing LLM error envelope. The UI retains the failed question and
+supports retrying the same request without duplicating the user turn, or editing the failed
+question. Pending requests block duplicate submissions. Existing read-only data is unchanged
+on success, retry, and failure. Replies render as plain text, not untrusted HTML.
+
+### 7.4 State and costs
+
+Conversations live only in the mounted chat page; navigation away clears them. The browser
+sends only the most recent messages within the server's count/character limits. Prior
+assistant messages are untrusted conversation context, not a source of saved nutrition facts.
+They can supply prior hypothetical portions for a follow-up draft. The prompt explicitly
+distinguishes that use from evidence of actual intake, retains unchanged ingredients during
+substitutions, and asks for clarification only when the needed context is absent or ambiguous.
+There are no new database tables, migrations, environment variables, dependencies, streaming,
+or chat-generation caches. Each nonempty-history live request normally makes one structured
+call. Invalid structured output gets at most one additional correction call, subject to the
+shared client's transport retry. M5 does not retry unavailable/quota or timeout errors itself.
+Rate limiting is future work.
+
+### 7.5 Validation
+
+Backend tests cover period boundaries, missing days, historical/absent goals, goal comparison
+direction, confirmed-only retrieval, no meal writes, fixture labeling, missing-history
+short-circuiting, unknown-reference rejection, request limits, numerical prose rejection,
+context truncation, meal-fact citations, and standard timeout errors. Frontend tests cover
+period selection, reference links, follow-up messages, request bounds, duplicate-submit
+prevention, retry, edit, and conversation reset. Prompt-boundary assertions are not a live
+adversarial evaluation. Mobile browser screenshots remain a manual check using a synthetic mock conversation.
+
+### 7.6 Hypothetical meal drafting
+
+Prompt `m5-chat.v3` allows practical portion suggestions for named ingredients, rather than
+requiring the user to supply all amounts first. Common preparation details can be stated as
+assumptions: cooked/raw weights, beef leanness, added cooking fat, and brand differences.
+An optional private structured draft contains up to five ingredient names, portion strings,
+estimated nutrition per whole portion, and up to three concise assumptions. No public JSON
+fields, tables, dependencies, or environment variables change.
+
+Draft estimates must be finite, non-negative, positive in energy, at most 2,000 kcal per
+ingredient and 3,000 kcal per draft, with basic macro-energy plausibility checks. This is
+validation of structure and plausibility, not a verified nutrient database. Python sums the
+ingredient estimates and renders the hypothetical total. The response explicitly labels
+the draft as unsaved AI estimates, includes assumptions, and suggests reviewing package
+labels and preparation before logging separately. Draft portion and estimate fields are
+the permitted source of hypothetical quantities. When a valid structured draft is accompanied
+by numeric prose, replace only that prose with a neutral introduction, preserving the validated
+draft and code-calculated totals. Record-summary numeric prose remains invalid and eligible
+for the bounded correction attempt. Numeric prose never supplies alternative saved facts.
+
+Assumption string limits are included in the JSON schema sent to the model. Validation
+failures log only field paths, stable error types, and the attempt number, never generated
+text or conversation contents. A second invalid output returns sanitized validation issues
+in the existing error envelope. These diagnostics distinguish numeric prose, oversized
+assumptions, and implausible energy without revealing the failed response.
+
+When today's confirmed daily-total row and its effective goals are present in the selected
+window, code supplies signed goal-minus-recorded gaps to guide portion suggestions. It
+computes projected above/below differences after adding the draft, without saving anything.
+That comparison automatically cites today and is qualified by missing meals; it is not an
+exact allowance or proof that dinner fits every target. Negative gaps are preserved, and
+the prompt avoids compensatory restriction. No logged today, missing goals, or a historical
+window produces no remaining-goal projection; a generic hypothetical draft can still be
+returned if other history is present. The existing no-history short circuit is unchanged.
+
+Complete rendered drafts remain in the bounded conversation sent by the frontend. A request
+such as replacing avocado with half a cup of raspberries should preserve the previously
+specified beef and rice amounts. This behavior depends on model interpretation of the
+retained conversation, not persistent server memory; reset, navigation, or history truncation
+can remove it. Draft replies render at most two supporting facts to keep them concise and
+fail with the standard invalid-output error if the full message exceeds the existing limit.
+
+Offline tests verify arithmetic, signed projections, missing-day handling, estimate validation,
+read-only endpoint behavior, automatic projection citations, and transmission/rendering of a
+substitution conversation. Mocked tests do not demonstrate that a live model retains portions.
+Live manual evaluation must cover:
+
+1. With Today selected and confirmed intake/goals present, request dinner portions using beef,
+   rice, and avocado; inspect portions, assumptions, estimated totals, and projected differences.
+2. Supply explicit beef/rice/avocado amounts, then replace only avocado with `1/2 cup`
+   raspberries. Verify beef and rice portions remain unchanged and totals are recalculated.
+3. Revise the rice amount alone; verify every other ingredient retains its amount.
+4. Ask whether the draft has been saved, then inspect history: no meal should have been added.
+5. Repeat without today's records or goals; verify no remaining allowance is invented.
+
+## 8. Next work
+
+- Evaluate live recommendation and chat relevance, restriction compliance, citation support,
+  numerical fidelity, neutral wording, and resistance to prompt injection.
+- Improve recommendation empty states and immediately hide dismissed suggestion cards.
+- Consider arbitrary-date retrieval, richer meal labels, streaming, cross-worker cost controls,
+  and rate limiting after the initial chat flow is verified.
 - Coordinate usability tasks measuring usefulness and whether users can explain the evidence.
-- Decide whether conversations should persist; no chat database migration is made here.
+- Revisit persistent conversations only if needed; this version deliberately keeps them local
+  to the current page.

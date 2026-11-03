@@ -4,7 +4,7 @@ from fastapi import APIRouter, Response, status
 
 from app.core.auth import CurrentUser
 from app.core.db import UserDb
-from app.modules.recommendations import service
+from app.modules.recommendations import chat_service, service
 from app.modules.recommendations.schemas import (
     ChatRequest,
     ChatResponse,
@@ -34,6 +34,6 @@ def post_recommendation_feedback(
 
 
 @router.post("/chat", response_model=ChatResponse)
-def post_chat(body: ChatRequest, _: CurrentUser) -> ChatResponse:
-    """Grounded chat (scope TBD). Currently returns a placeholder reply."""
-    return service.chat(body)
+def post_chat(body: ChatRequest, user: CurrentUser, db: UserDb) -> ChatResponse:
+    """Read-only chat about confirmed meals in the selected time window."""
+    return chat_service.chat(db, user.id, body)

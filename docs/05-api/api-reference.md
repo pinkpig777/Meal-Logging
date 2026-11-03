@@ -41,7 +41,7 @@ Changes from the Task & Team document:
 | GET | `/analytics/history` | M4 Xiaochuan | Day series over a date range |
 | GET | `/recommendations` | M5 Zach | Current suggestions with evidence |
 | POST | `/recommendations/feedback` | M5 Zach | Record suggestion feedback |
-| POST | `/chat` | M5 Zach | Grounded chat (scope TBD) |
+| POST | `/chat` | M5 Zach | Read-only grounded chat in a selected period |
 
 All paths are relative to `/api/v1`.
 
@@ -336,10 +336,13 @@ Feedback is user-scoped. On subsequent requests, the latest `not_for_me` or `alr
 response per metric suppresses that metric for seven days; `useful` leaves it eligible.
 Feedback never changes saved meals.
 
-### `POST /chat` → `200` *(scope TBD; still a placeholder)*
+### `POST /chat` → `200`
 
 ```json
-{ "messages": [ { "role": "user", "content": "Would a burrito fit my goals tonight?" } ] }
+{
+  "period": "today",
+  "messages": [ { "role": "user", "content": "How does my recorded protein compare with my goal?" } ]
+}
 ```
 
 ```json
@@ -348,3 +351,26 @@ Feedback never changes saved meals.
   "references": { "meal_ids": [], "dates": [] }
 }
 ```
+
+`period` is optional: `today`, `this_week`, `last_week`, or `last_14_days` (default).
+Weeks start Monday in the profile's time zone. The default window includes today; chat
+reports recorded intake so far rather than assuming the current day is complete.
+
+Requests contain 1–20 messages, at most 4,000 characters per message and 20,000 total;
+the final turn must be a non-blank user message. Invalid requests return `VALIDATION_ERROR`.
+No confirmed meals returns an explanatory answer and empty references without an AI call.
+Otherwise the shared LLM client selects verified facts and references; code supplies numeric
+summaries. Unsupported references return `LLM_INVALID_OUTPUT`; other `LLM_*` errors retain
+the existing envelope. Fixture mode is explicitly labeled as a recorded demo response.
+
+There are no chat database writes, meal side effects, or persisted conversations. Reference
+links point only to confirmed records retrieved for the signed-in user. Detailed meal context
+is bounded; aggregate facts still cover the selected window. See M5 design §7 for limits,
+qualitative-answer limitations, and retry behavior.
+
+Live chat can also propose and revise hypothetical ingredient portions. These are rendered
+inside `message.content` as unsaved AI nutrition estimates with preparation assumptions;
+the public response shape is unchanged. The server sums ingredient estimates and, only when
+today's recorded intake and effective goals exist in the selected window, calculates a
+qualified projection against today's goals. Prior hypothetical portions provide follow-up
+context but never count as confirmed intake. Drafting has no meal-writing side effects.
