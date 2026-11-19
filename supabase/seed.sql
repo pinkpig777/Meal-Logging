@@ -60,7 +60,7 @@ values
   ('00000000-0000-0000-0000-000000000001',
    (now() at time zone 'America/Chicago')::date - 43, 2200, 130, 260, 70),
   ('00000000-0000-0000-0000-000000000001',
-   (now() at time zone 'America/Chicago')::date - 17, 2000, 130, 220, 65);
+   (now() at time zone 'America/Chicago')::date - 17, 2000, 150, 205, 65);
 
 -- ---------------------------------------------------------------------------
 -- 42 days of confirmed meals (offsets 0..41 from today), fully deterministic.
