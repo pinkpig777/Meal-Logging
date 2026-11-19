@@ -57,6 +57,16 @@
   --carbs-text: #8a5d00;
   --fat-text: #b0386a;
 
+  /* M4 heatmap: % of that day's kcal goal, 5 ordinal steps of one warm hue
+     (docs/03-design/m4-visualization.md §6.6). Validated as an ordinal ramp on
+     the card surface. Light: low = light. --heat-none = day without a goal. */
+  --heat-1: #d4af8e;
+  --heat-2: #c09070;
+  --heat-3: #a2734f;
+  --heat-4: #82573a;
+  --heat-5: #5e3c27;
+  --heat-none: #b8b0a5;
+
   /* §4 Shadow: cards only in light mode; dark mode uses a 1px border instead. */
   --shadow-card-value: 0 1px 2px rgb(42 38 34 / 0.04), 0 4px 12px rgb(42 38 34 / 0.05);
   --card-edge: transparent;
@@ -90,6 +100,13 @@
     --carbs-text: #c98500;
     /* The dark fat fill (#d55181) is ~3.6:1 on the dark background; use the lighter tint for text. */
     --fat-text: #e87ba4;
+    /* Dark heatmap ramp: low = dark (close to the surface), high = light. */
+    --heat-1: #6e4a34;
+    --heat-2: #8e6243;
+    --heat-3: #ae7c57;
+    --heat-4: #cb9a72;
+    --heat-5: #e6be9a;
+    --heat-none: #5c5650;
     --shadow-card-value: none;
     --card-edge: #34302b;
     --overlay: rgb(0 0 0 / 0.6);
@@ -122,6 +139,12 @@
   --protein-text: #3987e5;
   --carbs-text: #c98500;
   --fat-text: #e87ba4;
+  --heat-1: #6e4a34;
+  --heat-2: #8e6243;
+  --heat-3: #ae7c57;
+  --heat-4: #cb9a72;
+  --heat-5: #e6be9a;
+  --heat-none: #5c5650;
   --shadow-card-value: none;
   --card-edge: #34302b;
   --overlay: rgb(0 0 0 / 0.6);

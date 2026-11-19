@@ -131,6 +131,8 @@ class DailyTotalsRecord(BaseModel):
     fat_g: float
     kcal_low: float
     kcal_high: float
+    kcal_checked: float
+    kcal_ai_only: float
     goal_id: UUID | None
     goal_effective_from: date | None
     goal_kcal: int | None

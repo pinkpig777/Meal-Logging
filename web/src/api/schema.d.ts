@@ -868,6 +868,16 @@ export interface components {
       kcal_low: number;
       /** Kcal High */
       kcal_high: number;
+      /**
+       * Kcal Checked
+       * @description kcal from items the user touched (source ai_clarified, user_edited, or user_added)
+       */
+      kcal_checked: number;
+      /**
+       * Kcal Ai Only
+       * @description kcal from untouched AI items (source ai); kcal_checked + this = kcal
+       */
+      kcal_ai_only: number;
     };
     /** OptionAnswer */
     OptionAnswer: {

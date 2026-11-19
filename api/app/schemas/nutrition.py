@@ -26,3 +26,11 @@ class Portion(BaseModel):
 class NutritionTotals(Nutrition):
     kcal_low: float
     kcal_high: float
+    kcal_checked: float = Field(
+        ge=0,
+        description="kcal from items the user touched (source ai_clarified, user_edited, "
+        "or user_added)",
+    )
+    kcal_ai_only: float = Field(
+        ge=0, description="kcal from untouched AI items (source ai); kcal_checked + this = kcal"
+    )

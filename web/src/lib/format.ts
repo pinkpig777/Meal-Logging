@@ -155,6 +155,11 @@ export function formatDayLabel(date: string): string {
   });
 }
 
+/** "2026-10-26" → "Oct 26" */
+export function formatMonthDay(date: string): string {
+  return parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 /** ISO timestamp → "12:30 PM" */
 export function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });

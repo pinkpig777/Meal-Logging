@@ -5,6 +5,7 @@ import { ErrorState } from '@/components/ErrorState';
 import { LoadingState } from '@/components/LoadingState';
 import { MealRow } from '@/components/MealRow';
 import { Button } from '@/components/ui/button';
+import { HistoryHeatmap } from '@/features/dashboard/HistoryHeatmap';
 import { formatDayLabel, toLocalDateString } from '@/lib/format';
 import { useMeals } from './api';
 import { groupByDate } from './grouping';
@@ -29,6 +30,9 @@ export function HistoryList() {
 
   return (
     <div className="space-y-6">
+      {/* M4 V5: calendar heatmap of % of goal; tap a day to open it in Today. */}
+      <HistoryHeatmap />
+
       <Button asChild variant="secondary" className="w-full border-dashed">
         <Link to="/log?backfill=1">
           <CalendarPlus aria-hidden="true" strokeWidth={1.75} />

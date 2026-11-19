@@ -5,6 +5,7 @@ No I/O here, so every rule is unit-testable.
 
 from collections.abc import Iterable, Sequence
 
+from app.schemas.common import ItemSource
 from app.schemas.nutrition import KcalRange, Nutrition, NutritionTotals
 
 ENERGY_TOLERANCE = 0.25  # 4p + 4c + 9f within ±25% of kcal
@@ -83,16 +84,33 @@ def scale_nutrition(n: Nutrition, factor: float) -> Nutrition:
     )
 
 
-def sum_totals(items: Iterable[tuple[Nutrition, KcalRange | None]]) -> NutritionTotals:
-    """Meal totals; an item without a range contributes its kcal to both bounds."""
-    kcal = protein = carbs = fat = low = high = 0.0
-    for n, rng in items:
+def sum_totals(
+    items: Iterable[tuple[Nutrition, KcalRange | None, ItemSource]],
+) -> NutritionTotals:
+    """Meal totals; an item without a range contributes its kcal to both bounds.
+
+    kcal is also split by provenance: `kcal_ai_only` for untouched AI items (source `ai`),
+    `kcal_checked` for everything the user touched, so the two always add up to `kcal`.
+    """
+    kcal = protein = carbs = fat = low = high = checked = ai_only = 0.0
+    for n, rng, source in items:
         kcal += n.kcal
         protein += n.protein_g
         carbs += n.carbs_g
         fat += n.fat_g
         low += rng.low if rng else n.kcal
         high += rng.high if rng else n.kcal
+        if source == ItemSource.ai:
+            ai_only += n.kcal
+        else:
+            checked += n.kcal
     return NutritionTotals(
-        kcal=kcal, protein_g=protein, carbs_g=carbs, fat_g=fat, kcal_low=low, kcal_high=high
+        kcal=kcal,
+        protein_g=protein,
+        carbs_g=carbs,
+        fat_g=fat,
+        kcal_low=low,
+        kcal_high=high,
+        kcal_checked=checked,
+        kcal_ai_only=ai_only,
     )

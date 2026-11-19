@@ -15,6 +15,8 @@ def row(day: int, protein: float) -> DailyTotalsRecord:
         fat_g=70,
         kcal_low=2000,
         kcal_high=2000,
+        kcal_checked=0,
+        kcal_ai_only=2000,
         goal_id=uuid4(),
         goal_effective_from=date(2026, 10, 1),
         goal_kcal=2000,

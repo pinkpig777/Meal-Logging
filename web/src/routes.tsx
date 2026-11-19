@@ -25,7 +25,7 @@ export const routes: RouteObject[] = [
     ),
     children: [
       { index: true, element: <TodayPage />, handle: h({ title: 'Today' }) },
-      { path: 'week', element: <WeekPage />, handle: h({ title: 'This week', back: true }) },
+      { path: 'week', element: <WeekPage />, handle: h({ title: 'Week', back: true }) },
       { path: 'log', element: <CapturePage />, handle: h({ title: 'Log a meal' }) },
       {
         path: 'meals/:id/review',
