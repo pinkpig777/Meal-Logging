@@ -4,6 +4,10 @@
  *
  * Seeded content (relative to today):
  *  - Confirmed meals on each of the last 7 days except 3 days ago (unlogged day).
+ *  - Older history back to 40 days ago with varied totals and a few unlogged
+ *    days (days 31+ predate the goal, so they have no goal).
+ *  - Some items are user-checked (edited/clarified/added) so totals split into
+ *    kcal_checked and kcal_ai_only.
  *  - One draft meal (DEMO_DRAFT_ID) with two asked clarifications:
  *    a portion question (rice) and a preparation question (chicken).
  */
@@ -59,6 +63,8 @@ export function computeTotals(items: MealItem[]): NutritionTotals {
     fat_g: 0,
     kcal_low: 0,
     kcal_high: 0,
+    kcal_checked: 0,
+    kcal_ai_only: 0,
   };
   for (const i of items) {
     t.kcal += i.nutrition.kcal;
@@ -67,6 +73,9 @@ export function computeTotals(items: MealItem[]): NutritionTotals {
     t.fat_g += i.nutrition.fat_g;
     t.kcal_low += i.kcal_range?.low ?? i.nutrition.kcal;
     t.kcal_high += i.kcal_range?.high ?? i.nutrition.kcal;
+    // Checked = the user touched the item (answered, edited, or added it).
+    if (i.source === 'ai') t.kcal_ai_only += i.nutrition.kcal;
+    else t.kcal_checked += i.nutrition.kcal;
   }
   return t;
 }
@@ -304,9 +313,15 @@ function confirmedMeals(): Meal[] {
       meal_type: 'breakfast',
       eaten: daysAgo(d, 8, 10),
       items: [
-        item({ name: 'Greek yogurt', portion: p(1, 'cup', 245), nutrition: n(146, 20, 8, 3.8) }),
+        item({
+          name: 'Greek yogurt',
+          portion: p(1, 'cup', 245),
+          nutrition: n(146, 20, 8, 3.8),
+          source: 'user_edited',
+        }),
         item({
           name: 'Granola',
+          source: 'ai_clarified',
           kind: 'addon',
           portion: p(0.25, 'cup', 30),
           nutrition: n(140, 3.2, 19, 6),
@@ -343,6 +358,7 @@ function confirmedMeals(): Meal[] {
         item({
           name: 'Salmon fillet',
           preparation: 'baked',
+          source: 'ai_clarified',
           portion: p(1, 'piece', 150),
           nutrition: n(310, 34, 0, 18.5),
         }),
@@ -362,12 +378,79 @@ function confirmedMeals(): Meal[] {
       items: [item({ name: 'Apple', portion: p(1, 'piece', 182), nutrition: n(95, 0.5, 25, 0.3) })],
     });
 
+  const pastaDinner = (d: number) =>
+    meal({
+      status: 'confirmed',
+      meal_type: 'dinner',
+      eaten: daysAgo(d, 19, 30),
+      items: [
+        item({
+          name: 'Spaghetti bolognese',
+          portion: p(2, 'cup', 480),
+          nutrition: n(880, 42, 104, 30),
+          kcal_range: null,
+          uncertain_attributes: [
+            attr(
+              'portion',
+              'Plate depth is hard to judge',
+              'How much pasta did you eat?',
+              [
+                { id: 'one_half', label: '1½ cups', nutrition: n(660, 31, 78, 22), portion: null },
+                { id: 'two', label: '2 cups', nutrition: n(880, 42, 104, 30), portion: null },
+                { id: 'three', label: '3 cups', nutrition: n(1320, 63, 156, 45), portion: null },
+              ],
+              'two',
+              false,
+            ),
+          ],
+        }),
+        item({
+          name: 'Garlic bread',
+          kind: 'addon',
+          portion: p(2, 'slice', 60),
+          nutrition: n(220, 5, 26, 10),
+          source: 'user_edited',
+        }),
+      ],
+    });
+  const dessert = (d: number) =>
+    meal({
+      status: 'confirmed',
+      meal_type: 'snack',
+      eaten: daysAgo(d, 21, 0),
+      items: [
+        item({
+          name: 'Chocolate chip cookies',
+          portion: p(2, 'piece', 60),
+          nutrition: n(350, 4, 46, 17),
+          source: 'user_added',
+        }),
+      ],
+    });
+
   const out: Meal[] = [];
   // Today: breakfast only so far. 3 days ago: unlogged (unknown, not zero).
   out.push(breakfast(0));
   for (const d of [1, 2, 4, 5, 6, 7]) {
     out.push(breakfast(d), lunch(d), dinner(d));
     if (d % 2 === 0) out.push(snack(d));
+  }
+  // Older history (for the calendar heatmap): a varied mix of light and heavy
+  // days, with a few unlogged days. Each pattern lands in a different
+  // %-of-goal step (goal 2,000 kcal).
+  const patterns: ((d: number) => Meal[])[] = [
+    (d) => [breakfast(d), lunch(d), dinner(d)], // ~80%
+    (d) => [breakfast(d), lunch(d), pastaDinner(d)], // ~108%
+    (d) => [breakfast(d), lunch(d)], // ~53%
+    (d) => [breakfast(d), lunch(d), dinner(d), dessert(d)], // ~98%
+    (d) => [breakfast(d), lunch(d), pastaDinner(d), dessert(d)], // ~125%
+    (d) => [breakfast(d), lunch(d), dinner(d), snack(d)], // ~85%
+    (d) => [breakfast(d), lunch(d), pastaDinner(d), dessert(d), dessert(d)], // ~143%
+  ];
+  const unloggedOlder = new Set([10, 16, 23, 31]);
+  for (let d = 8; d <= 40; d++) {
+    if (unloggedOlder.has(d)) continue;
+    out.push(...patterns[(d * 3) % patterns.length](d));
   }
   // A not_sure attribute left on one confirmed meal, so the detail page shows a cue.
   const l = out.find((m) => m.meal_type === 'lunch');

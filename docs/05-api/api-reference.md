@@ -110,7 +110,9 @@ interface MealItem {
 interface NutritionTotals extends Nutrition {
   kcal_low: number;
   kcal_high: number;
-}
+  kcal_checked: number;        // kcal from items the user touched (ai_clarified, user_edited, user_added)
+  kcal_ai_only: number;        // kcal from untouched AI items (source = ai)
+}                              // kcal_checked + kcal_ai_only = kcal (meal and day totals alike)
 
 interface Meal {
   id: string;

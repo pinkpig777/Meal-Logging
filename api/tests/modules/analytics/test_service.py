@@ -16,6 +16,8 @@ def row(day: date, kcal: float) -> DailyTotalsRecord:
         fat_g=60,
         kcal_low=kcal,
         kcal_high=kcal,
+        kcal_checked=0,
+        kcal_ai_only=kcal,
         goal_id=None,
         goal_effective_from=None,
         goal_kcal=None,

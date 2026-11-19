@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { toLocalDateString } from '@/lib/format';
+import { parseLocalDate, toLocalDateString } from '@/lib/format';
 import { renderRoute } from '@/test/utils';
 
 function mondayWeeksAgo(weeks: number) {
@@ -24,5 +24,31 @@ describe('WeekPage (MSW)', () => {
     expect(
       screen.getByText(/logged days?; days without meals are not counted/),
     ).toBeInTheDocument();
+  });
+
+  it('titles the current week "This week" and a past week "Week of …"', async () => {
+    const { unmount } = renderRoute('/week');
+    expect(await screen.findByRole('heading', { name: 'This week' })).toBeInTheDocument();
+    unmount();
+
+    const past = mondayWeeksAgo(2);
+    renderRoute(`/week?start=${past}`);
+    const label = parseLocalDate(past).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    expect(await screen.findByRole('heading', { name: `Week of ${label}` })).toBeInTheDocument();
+    expect(screen.queryByText('This week')).not.toBeInTheDocument();
+  });
+
+  it('draws logged days as split bars on one shared scale', async () => {
+    renderRoute(`/week?start=${mondayWeeksAgo(1)}`);
+    const bars = await screen.findAllByTestId('kcal-bar');
+    expect(bars.length).toBeGreaterThan(0);
+    // Seeded days mix checked (solid) and AI-only (striped) kcal.
+    expect(screen.getAllByTestId('bar-checked').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('bar-ai').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('bar-goal').length).toBe(bars.length);
+    expect(screen.getByText('AI estimate')).toBeInTheDocument();
   });
 });

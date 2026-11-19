@@ -269,6 +269,15 @@ The validated item exactly as returned by the analysis, before any clarification
 | `meal_totals` | meal | Sum of item nutrition, `kcal_low`, and `kcal_high` (an item with no range contributes its `kcal` to both bounds) for every meal |
 | `daily_totals` | user × `local_date` | Sum over **confirmed** meals; `meal_count`; joined to the effective goal. Only dates with ≥ 1 confirmed meal produce rows. |
 
+Both views also split `kcal` by item provenance:
+
+| Column | Definition |
+|---|---|
+| `kcal_checked` | Sum of item `kcal` where `source` is `ai_clarified`, `user_edited`, or `user_added` (the user touched the item) |
+| `kcal_ai_only` | Sum of item `kcal` where `source = ai` (untouched AI estimate) |
+
+`kcal_checked + kcal_ai_only = kcal` always holds. The columns are appended after the existing ones (migration `20261119120000_totals_checked_split`).
+
 Weekly and longer aggregations are computed from `daily_totals` by the analytics endpoints. Averages divide by the number of **logged days**, not by 7 (ADR-0005).
 
 All views use `security_invoker = true`, so RLS on the base tables applies.

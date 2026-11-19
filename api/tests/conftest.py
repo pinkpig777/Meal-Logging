@@ -206,7 +206,7 @@ class FakeStore:
         rows = []
         for day in sorted(by_day):
             items = [i for m in by_day[day] for i in m.items]
-            totals = sum_totals((i.nutrition, i.kcal_range) for i in items)
+            totals = sum_totals((i.nutrition, i.kcal_range, i.source) for i in items)
             goal = repository.effective_goal(self.goals, day)
             rows.append(
                 DailyTotalsRecord(

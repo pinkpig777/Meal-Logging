@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { DailyAnalytics, HistoryAnalytics, WeeklyAnalytics } from '@/api/types';
 import { apiFetch } from '@/lib/api';
 import { queryKeys } from '@/lib/queryKeys';
@@ -26,5 +26,7 @@ export function useHistoryAnalytics(from: string, to: string) {
     queryKey: queryKeys.analytics.history(from, to),
     queryFn: ({ signal }) =>
       apiFetch<HistoryAnalytics>('/analytics/history', { query: { from, to }, signal }),
+    // Keep the previous page on screen while paging the calendar.
+    placeholderData: keepPreviousData,
   });
 }

@@ -7,14 +7,16 @@ import { LoadingState } from '@/components/LoadingState';
 import { MacroTile } from '@/components/MacroTile';
 import { MealRow } from '@/components/MealRow';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { formatDayLabel, parseLocalDate, toLocalDateString } from '@/lib/format';
 import { useDailyAnalytics } from './api';
+import { MealContributionBar } from './charts/MealContributionBar';
 
 /**
  * M4 · Xiaochuan — daily dashboard (`/` and `/?date=YYYY-MM-DD` for drill-down).
- * Numbers first: calorie hero, macro tiles, meals. No chart library yet.
- * TODO(Xiaochuan): visual design per docs/03-design/m4-visualization.md
- * (replace the hero/tiles with the chosen visualization if needed).
+ * Numbers first: calorie hero (D3 split bar toward the goal), macro tiles,
+ * then each meal's contribution as a stacked D3 bar and the meal rows.
+ * See docs/03-design/m4-visualization.md §6.2.
  */
 export function TodayPage() {
   const [params, setParams] = useSearchParams();
@@ -101,6 +103,14 @@ export function TodayPage() {
             <h2 id="today-meals-h" className="text-heading">
               Meals
             </h2>
+            {q.data.meals.length > 0 && (
+              <Card className="gap-2">
+                <p className="text-label text-muted-foreground font-normal">
+                  {q.data.goal?.kcal ? 'Each meal toward your goal' : 'Each meal’s calories'}
+                </p>
+                <MealContributionBar meals={q.data.meals} goal={q.data.goal?.kcal ?? null} />
+              </Card>
+            )}
             {q.data.meals.map((m) => (
               <MealRow key={m.id} meal={m} />
             ))}

@@ -2882,6 +2882,18 @@
           "kcal_high": {
             "type": "number",
             "title": "Kcal High"
+          },
+          "kcal_checked": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Kcal Checked",
+            "description": "kcal from items the user touched (source ai_clarified, user_edited, or user_added)"
+          },
+          "kcal_ai_only": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Kcal Ai Only",
+            "description": "kcal from untouched AI items (source ai); kcal_checked + this = kcal"
           }
         },
         "type": "object",
@@ -2891,7 +2903,9 @@
           "carbs_g",
           "fat_g",
           "kcal_low",
-          "kcal_high"
+          "kcal_high",
+          "kcal_checked",
+          "kcal_ai_only"
         ],
         "title": "NutritionTotals"
       },

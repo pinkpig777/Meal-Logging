@@ -4,7 +4,7 @@ import pytest
 
 from app.modules.recognition.service import build_draft_items, infer_meal_type
 from app.modules.recognition.validation import to_new_item
-from app.schemas import KcalRange, MealType, Nutrition
+from app.schemas import ItemSource, KcalRange, MealType, Nutrition
 from app.services.llm import fixtures
 from app.services.nutrition import impact_kcal, kcal_range, sum_totals
 
@@ -41,8 +41,12 @@ def test_range_never_below_zero() -> None:
 def test_totals_use_kcal_for_items_without_range() -> None:
     totals = sum_totals(
         [
-            (Nutrition(kcal=100, protein_g=1, carbs_g=2, fat_g=3), KcalRange(low=80, high=150)),
-            (Nutrition(kcal=50, protein_g=1, carbs_g=1, fat_g=1), None),
+            (
+                Nutrition(kcal=100, protein_g=1, carbs_g=2, fat_g=3),
+                KcalRange(low=80, high=150),
+                ItemSource.ai,
+            ),
+            (Nutrition(kcal=50, protein_g=1, carbs_g=1, fat_g=1), None, ItemSource.ai),
         ]
     )
     assert (totals.kcal, totals.kcal_low, totals.kcal_high) == (150, 130, 200)

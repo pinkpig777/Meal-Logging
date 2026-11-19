@@ -40,7 +40,8 @@ DEFAULT_TIMEZONE = "America/Chicago"
 
 _MEAL_WITH_ITEMS = "*, meal_items(*, uncertain_attributes(*))"
 _MEAL_WITH_ITEM_TOTALS = (
-    "*, meal_items(id, position, name, kcal, protein_g, carbs_g, fat_g, kcal_low, kcal_high)"
+    "*, meal_items(id, position, name, kcal, protein_g, carbs_g, fat_g, kcal_low, kcal_high,"
+    " source)"
 )
 
 
@@ -476,7 +477,7 @@ def to_meal(record: MealRecord, photo_url: str | None) -> Meal:
         image_issues=record.image_issues,
         failure_reason=record.failure_reason,
         items=[to_item(i) for i in record.items],
-        totals=sum_totals((i.nutrition, i.kcal_range) for i in record.items),
+        totals=sum_totals((i.nutrition, i.kcal_range, i.source) for i in record.items),
         created_at=record.created_at,
         updated_at=record.updated_at,
         confirmed_at=record.confirmed_at,
@@ -492,7 +493,7 @@ def to_summary(record: MealRecord, photo_url: str | None) -> MealSummary:
         local_date=record.local_date,
         photo_url=photo_url,
         item_names=[i.name for i in record.items],
-        totals=sum_totals((i.nutrition, i.kcal_range) for i in record.items),
+        totals=sum_totals((i.nutrition, i.kcal_range, i.source) for i in record.items),
     )
 
 

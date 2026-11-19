@@ -30,6 +30,8 @@ def _totals(row: DailyTotalsRecord) -> NutritionTotals:
         fat_g=row.fat_g,
         kcal_low=row.kcal_low,
         kcal_high=row.kcal_high,
+        kcal_checked=row.kcal_checked,
+        kcal_ai_only=row.kcal_ai_only,
     )
 
 

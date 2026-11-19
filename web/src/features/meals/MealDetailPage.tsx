@@ -1,5 +1,5 @@
 import { ImageOff, Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { toast } from 'sonner';
 import { BottomSheet } from '@/components/BottomSheet';
@@ -9,13 +9,24 @@ import { MacroLine } from '@/components/MacroLine';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { MealItemsChart } from '@/features/dashboard/charts/MealItemsChart';
 import { ItemCard } from '@/features/review/ItemEditor';
 import { MEAL_TYPE_LABEL, formatDayLabel, formatTime, formatTotalsKcalValue } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { useDeleteMeal, useDeleteMealPhoto, useMeal } from './api';
+
+/** Scroll an element into view without animating when reduced motion is on. */
+function reveal(el: Element | null | undefined) {
+  if (!el || typeof el.scrollIntoView !== 'function') return;
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+}
 
 /**
  * M3 · Yi-Wei — confirmed meal: view, edit (reuses the review screen in edit
  * mode), delete meal, delete photo only.
+ * The "Calories by item" chart (M4 V4) is linked to the item list: tapping a
+ * bar highlights its item card, tapping a card highlights its bar.
  * TODO(Yi-Wei): meal type / time editing, provenance details, undo after delete.
  */
 export function MealDetailPage() {
@@ -25,6 +36,10 @@ export function MealDetailPage() {
   const del = useDeleteMeal(id);
   const delPhoto = useDeleteMealPhoto(id);
   const [confirming, setConfirming] = useState<'meal' | 'photo' | null>(null);
+  // Linked highlighting between the item chart and the item list (M4 V4).
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const itemRefs = useRef(new Map<string, HTMLDivElement>());
+  const chartRef = useRef<HTMLDivElement>(null);
 
   if (mealQuery.isPending) return <LoadingState layout="detail" />;
   if (mealQuery.isError)
@@ -61,12 +76,54 @@ export function MealDetailPage() {
         </Button>
       )}
 
+      {meal.items.length > 0 && (
+        <section className="space-y-3" aria-labelledby="detail-chart-h">
+          <h2 id="detail-chart-h" className="text-heading">
+            Calories by item
+          </h2>
+          <Card>
+            <div ref={chartRef}>
+              <MealItemsChart
+                items={meal.items}
+                selectedId={selectedItem}
+                onSelect={(itemId) => {
+                  const next = itemId === selectedItem ? null : itemId;
+                  setSelectedItem(next);
+                  if (next) reveal(itemRefs.current.get(next));
+                }}
+              />
+            </div>
+          </Card>
+        </section>
+      )}
+
       <section className="space-y-3" aria-labelledby="detail-items-h">
         <h2 id="detail-items-h" className="text-heading">
           Items
         </h2>
         {meal.items.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <div
+            key={item.id}
+            data-testid="item-card"
+            data-item-id={item.id}
+            data-selected={item.id === selectedItem || undefined}
+            ref={(el) => {
+              if (el) itemRefs.current.set(item.id, el);
+              else itemRefs.current.delete(item.id);
+            }}
+            onClick={() => {
+              const next = item.id === selectedItem ? null : item.id;
+              setSelectedItem(next);
+              if (next) reveal(chartRef.current);
+            }}
+            className={cn(
+              'rounded-card scroll-mt-20 scroll-mb-[calc(var(--spacing-nav)+env(safe-area-inset-bottom)+1.5rem)] transition-shadow duration-150',
+              item.id === selectedItem &&
+                'ring-primary ring-offset-background ring-2 ring-offset-2',
+            )}
+          >
+            <ItemCard item={item} />
+          </div>
         ))}
       </section>
 
