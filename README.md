@@ -78,6 +78,7 @@ Start at the **[docs index](docs/README.md)**. Key documents:
 
 | Topic | Document |
 |---|---|
+| How to use the app (with screenshots) | [User manual](docs/user-manual/README.md) |
 | What we're building and why | [Product brief](docs/00-overview/product-brief.md) |
 | Shared vocabulary | [Glossary](docs/00-overview/glossary.md) |
 | Architecture | [System architecture](docs/02-architecture/system-architecture.md) · [Tech stack](docs/02-architecture/tech-stack.md) |
