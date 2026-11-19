@@ -30,6 +30,7 @@ Design and engineering documentation for the Intelligent Meal Logging applicatio
 | | [Dev workflow](07-engineering/dev-workflow.md): branching, PRs, commits | Accepted | Charlie |
 | | [Environment setup](07-engineering/environment-setup.md) | Draft | Yi-Wei |
 | | [Testing strategy](07-engineering/testing-strategy.md) | Draft | All |
+| **User manual** | [User manual](user-manual/README.md): every screen with screenshots | Current | Charlie |
 | **Evaluation** | `08-evaluation/usability-study-plan.md` | Planned | Zach |
 
 ## Architecture Decision Records
